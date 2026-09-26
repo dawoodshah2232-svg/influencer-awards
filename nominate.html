@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nominate Yourself — ProFluencer Awards 2026</title>
+<meta name="description" content="Nominate yourself for the ProFluencer Awards 2026. Pick your industry category, get your personal voting link, and rally your audience. Free to enter.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="nominate">
+<header id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container" style="max-width:780px">
+    <span class="eyebrow">Free nomination · 18+</span>
+    <h1 class="sec-title">Put your name on the ballot</h1>
+    <p class="sec-sub">Complete your profile below. Our team reviews every nomination for authenticity and category fit before it goes live. One active nomination per influencer per edition.</p>
+  </div>
+</div>
+
+<section style="padding-top:10px">
+  <div class="container" style="max-width:760px">
+    <div class="form-card">
+      <div class="form-error" id="ferr"></div>
+      <form id="nom-form" novalidate>
+        <h3 style="margin-bottom:16px;font-size:17px">Identity</h3>
+        <div class="form-2col">
+          <div class="field"><label>Legal name * <span class="hint" style="display:inline">— private, for records</span></label><input name="legalName" required placeholder="As on your ID" autocomplete="name"></div>
+          <div class="field"><label>Public display name *</label><input name="displayName" required placeholder="How fans know you"></div>
+        </div>
+        <div class="form-2col">
+          <div class="field"><label>Email *</label><input name="email" type="email" required placeholder="you@email.com" autocomplete="email"></div>
+          <div class="field"><label>Mobile (with country code) *</label><input name="mobile" type="tel" required placeholder="+971 5X XXX XXXX" autocomplete="tel"></div>
+        </div>
+        <div class="form-2col">
+          <div class="field"><label>Country *</label><input name="country" required placeholder="United Arab Emirates"></div>
+          <div class="field"><label>City *</label><input name="city" required placeholder="Dubai"></div>
+        </div>
+
+        <h3 style="margin:26px 0 16px;font-size:17px">Your category & profiles</h3>
+        <div class="field"><label>Industry category *</label>
+          <select name="categoryId" id="cat-select" required><option value="">Select your category — one per influencer</option></select>
+          <div class="hint">Category changes are allowed before voting opens (Oct 15). After that, categories are locked.</div>
+        </div>
+        <div class="form-2col">
+          <div class="field"><label>Primary platform *</label>
+            <select name="platform" required><option value="">Select</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Twitch</option><option>X</option><option>Facebook</option></select></div>
+          <div class="field"><label>Handle *</label><input name="handle" required placeholder="@yourhandle"></div>
+        </div>
+        <div class="field"><label>Profile URL *</label><input name="profileUrl" type="url" required placeholder="https://instagram.com/yourhandle"><div class="hint">Must be publicly accessible — reviewers verify it.</div></div>
+        <div class="form-2col">
+          <div class="field"><label>Followers (self-reported)</label><input name="followers" placeholder="e.g. 250K"></div>
+          <div class="field"><label>Profile photo</label><input name="photo" type="file" accept="image/*" id="photo-input"><div class="hint">Optional — square photo works best.</div></div>
+        </div>
+        <div class="field"><label>Short bio *</label><textarea name="bio" rows="3" required maxlength="280" placeholder="What you create and why your audience loves you (max 280 chars)"></textarea></div>
+
+        <h3 style="margin:26px 0 16px;font-size:17px">Account & consent</h3>
+        <div class="field"><label>Create password *</label><input name="password" type="password" required minlength="6" placeholder="Min. 6 characters — for your dashboard login" autocomplete="new-password"></div>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-bottom:12px">
+          <input type="checkbox" id="mkt" style="width:auto;margin-top:4px">
+          <span>Keep me posted with ProFluencer news and future editions (optional).</span>
+        </label>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-bottom:20px">
+          <input type="checkbox" id="agree" style="width:auto;margin-top:4px">
+          <span>I confirm this is my own public creator profile, I am 18 or older, and I accept the <a href="terms.html" style="color:var(--gold-lt);text-decoration:underline">voting rules and terms</a> (version <span id="tver"></span>).</span>
+        </label>
+        <button class="btn btn-gold btn-block" type="submit">Submit nomination</button>
+        <p class="hint center" style="margin-top:14px">Already nominated? <a href="login.html" style="color:var(--gold-lt);font-weight:700">Log in to your dashboard</a></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  document.getElementById('tver').textContent = PFA.settings().termsVersion;
+  var sel = document.getElementById('cat-select');
+  PFA.CATEGORIES.forEach(function (c) {
+    var o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name + ' — ' + c.tagline;
+    sel.appendChild(o);
+  });
+
+  if (PFA.session()) { location.href = 'dashboard.html'; return; }
+
+  var form = document.getElementById('nom-form'), err = document.getElementById('ferr'), photoData = '';
+  document.getElementById('photo-input').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 600 * 1024) { APP.toast('Photo too large — max 600KB'); e.target.value = ''; return; }
+    var r = new FileReader();
+    r.onload = function () { photoData = r.result; };
+    r.readAsDataURL(f);
+  });
+
+  function fail(m) { err.textContent = m; err.style.display = 'block'; err.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.style.display = 'none';
+    var fd = new FormData(form), d = {};
+    fd.forEach(function (v, k) { if (k !== 'photo') d[k] = String(v).trim(); });
+    var req = ['legalName', 'displayName', 'email', 'mobile', 'country', 'city', 'categoryId', 'platform', 'handle', 'profileUrl', 'bio', 'password'];
+    for (var i = 0; i < req.length; i++) if (!d[req[i]]) return fail('Please complete all required fields.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return fail('Please enter a valid email address.');
+    if (d.mobile.replace(/\D/g, '').length < 7) return fail('Please enter a valid mobile number with country code.');
+    if (d.password.length < 6) return fail('Password must be at least 6 characters.');
+    if (d.handle[0] !== '@') d.handle = '@' + d.handle;
+    if (!document.getElementById('agree').checked) return fail('Please accept the voting rules to continue.');
+    d.photo = photoData;
+    d.marketingConsent = document.getElementById('mkt').checked;
+    PFA.nominate(d);
+    location.href = 'dashboard.html?welcome=1';
+  });
+})();
+</script>
+</body>
+</html>

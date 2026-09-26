@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ceremony & RSVP — ProFluencer Awards 2026</title>
+<meta name="description" content="The ProFluencer Awards afternoon: Friday, December 11, 2026 in Dubai. 50 trophies, live announcements, and an evening gala. RSVP for your invitation.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="event">
+<header id="site-header"></header>
+
+<div class="ceremony" style="padding-top:80px">
+  <div class="container">
+    <div class="center reveal">
+      <span class="eyebrow" style="color:#9c7a1e">You are invited</span>
+      <h1 class="sec-title">The awards afternoon</h1>
+      <p class="sec-sub">Fifty golden trophies. Ten industries. One unforgettable afternoon in Dubai.</p>
+    </div>
+    <div class="cer-grid">
+      <div class="cer-img reveal"><img src="assets/img/ceremony.jpg" alt="Awards ceremony celebration"></div>
+      <div class="reveal">
+        <div class="cer-facts">
+          <div class="cer-fact"><b>Friday, Dec 11, 2026</b><span>Afternoon session · 3:00 PM GST</span></div>
+          <div class="cer-fact"><b>Dubai, UAE</b><span>Venue announced soon</span></div>
+          <div class="cer-fact"><b>50 honourees</b><span>Top 5 of every category</span></div>
+          <div class="cer-fact"><b>Evening gala</b><span>Celebrations after the stage</span></div>
+        </div>
+        <p style="margin-top:20px;color:#5a5a5a;font-size:14.5px">Winners are announced live on stage in each of the 10 categories, then celebrated at the evening gala. Approved nominees, sponsors and invited guests receive invitations — confirm yours below.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container" style="max-width:640px">
+    <div class="center reveal">
+      <span class="eyebrow">RSVP</span>
+      <h2 class="sec-title" style="font-size:clamp(24px,4.5vw,36px)">Reserve your seat</h2>
+      <p class="sec-sub">RSVPs are reviewed by the events team. Confirmed guests receive their invitation by email.</p>
+    </div>
+    <div class="form-card reveal">
+      <div class="form-ok" id="rsvp-ok" style="margin-bottom:14px">Thank you — your RSVP is recorded. Watch your inbox for the invitation.</div>
+      <form id="rsvp-form" novalidate>
+        <div class="form-error" id="rsvp-err"></div>
+        <div class="form-2col">
+          <div class="field"><label>Full name *</label><input name="name" required autocomplete="name"></div>
+          <div class="field"><label>Email *</label><input name="email" type="email" required autocomplete="email"></div>
+        </div>
+        <div class="form-2col">
+          <div class="field"><label>Mobile</label><input name="mobile" type="tel" autocomplete="tel"></div>
+          <div class="field"><label>Guests</label><select name="guests"><option value="1">Just me</option><option value="2">+1 guest</option><option value="3">+2 guests</option></select></div>
+        </div>
+        <div class="field"><label>I am a…</label>
+          <select name="type"><option value="guest">Guest</option><option value="nominee">Approved nominee</option><option value="sponsor">Sponsor</option><option value="media">Media</option><option value="brand">Brand partner</option></select>
+        </div>
+        <button class="btn btn-gold btn-block" type="submit">Confirm RSVP</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var form = document.getElementById('rsvp-form'), err = document.getElementById('rsvp-err');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.style.display = 'none';
+    var fd = new FormData(form), d = {};
+    fd.forEach(function (v, k) { d[k] = String(v).trim(); });
+    if (!d.name) { err.textContent = 'Please enter your name.'; err.style.display = 'block'; return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; err.style.display = 'block'; return; }
+    PFA.addRsvp(d);
+    document.getElementById('rsvp-ok').style.display = 'block';
+    form.style.display = 'none';
+    form.reset();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>My Dashboard — ProFluencer Awards 2026</title>
+<meta name="description" content="Your ProFluencer Awards dashboard: nomination status, live votes, vote share, rank, countdown, top 5 showcase and your personal voting link with QR code.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body data-page="dashboard">
+<header id="site-header"></header>
+
+<div class="page-hero" style="padding-bottom:30px">
+  <div class="container">
+    <div id="dash-welcome"></div>
+
+    <div class="dash-head">
+      <div class="avatar" id="d-avatar" style="width:72px;height:72px;font-size:28px">?</div>
+      <div style="flex:1;min-width:200px">
+        <span class="chip" id="d-cat">Category</span>
+        <span class="pill pend" id="d-status" style="margin-left:8px">SUBMITTED</span>
+        <h2 id="d-name" style="margin-top:8px">Loading…</h2>
+        <div class="handle" id="d-handle" style="color:var(--muted);font-size:14px"></div>
+      </div>
+      <button class="mini-btn" id="d-logout">Log out</button>
+    </div>
+    <p class="hint" id="d-notes" style="display:none;margin:-14px 0 22px"></p>
+
+    <div class="dash-stats">
+      <div class="dstat"><b id="s-votes">0</b><span>Valid votes</span></div>
+      <div class="dstat"><b id="s-pct">0.0%</b><span>Share of category</span></div>
+      <div class="dstat"><b id="s-rank">#–</b><span>Your rank</span></div>
+      <div class="dstat"><b id="s-gap">–</b><span>Votes to #1</span></div>
+    </div>
+    <p class="hint" style="margin:-14px 0 22px">Provisional — subject to vote verification · <span id="s-updated"></span> · auto-refreshes every 30 seconds</p>
+
+    <div class="panel" id="final-panel" style="display:none;border-color:var(--gold)">
+      <h3>Final result</h3>
+      <p class="sub" id="final-text"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Your personal voting link</h3>
+      <p class="sub" id="link-sub">Share this everywhere — every verified tap is a vote. One vote per person per category.</p>
+      <div class="linkbox"><code id="vote-link"></code><button class="btn btn-gold btn-sm" id="copy-link">Copy link</button></div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:6px">
+        <div id="qr" style="background:#fff;padding:10px;border-radius:12px"></div>
+        <div>
+          <div class="share-row" id="share-row" style="margin-top:0"></div>
+          <p class="hint" style="margin-top:10px">Tip: print the QR on flyers, menus or event banners.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 id="cd-title">Countdown to voting close</h3>
+      <p class="sub">Voting closes November 30, 2026 · 11:59 PM GST · Winners crowned Dec 11 afternoon</p>
+      <div class="countdown" style="margin-top:4px">
+        <div class="cd-cell"><b data-cd-d>00</b><span>Days</span></div>
+        <div class="cd-cell"><b data-cd-h>00</b><span>Hours</span></div>
+        <div class="cd-cell"><b data-cd-m>00</b><span>Mins</span></div>
+        <div class="cd-cell"><b data-cd-s>00</b><span>Secs</span></div>
+      </div>
+    </div>
+
+    <div class="lb" id="d-board">
+      <div class="lb-head"><h3 id="d-board-title">Top 5 — your category</h3><span class="chip">Live · provisional</span></div>
+      <div id="d-rows"></div>
+    </div>
+  </div>
+</div>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var me = PFA.session();
+  if (!me) { location.href = 'login.html'; return; }
+
+  if (new URLSearchParams(location.search).get('welcome')) {
+    document.getElementById('dash-welcome').innerHTML =
+      '<div class="form-ok" style="display:block;margin-bottom:22px"><b>Nomination submitted.</b> Our team will review your profile shortly. Your personal voting link below activates as soon as you are approved — get ready to share it.</div>';
+  }
+
+  var STATUS_LABEL = {
+    submitted: ['SUBMITTED', 'pend'], changes_requested: ['CHANGES REQUESTED', 'pend'],
+    approved: ['APPROVED', 'ok'], rejected: ['REJECTED', 'pend'],
+    withdrawn: ['WITHDRAWN', 'pend'], disqualified: ['DISQUALIFIED', 'pend']
+  };
+
+  function render() {
+    me = PFA.get(me.id);
+    if (!me) { PFA.clearSession(); location.href = 'login.html'; return; }
+    var cat = PFA.category(me.categoryId);
+    var list = PFA.byCategory(me.categoryId, true);
+    var total = list.reduce(function (s, x) { return s + x.votes; }, 0);
+    var rank = PFA.rank(me);
+    var pct = PFA.pct(me);
+    var leader = list[0];
+    var st = STATUS_LABEL[me.status] || STATUS_LABEL.submitted;
+
+    var av = document.getElementById('d-avatar');
+    if (me.photo) { av.innerHTML = '<img src="' + me.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; }
+    else av.textContent = PFA.initials(me.name);
+
+    document.getElementById('d-name').textContent = me.name;
+    document.getElementById('d-handle').textContent = me.handle + ' · ' + me.platform + (me.followers ? ' · ' + me.followers + ' followers' : '');
+    document.getElementById('d-cat').textContent = cat ? cat.name : '';
+    var stEl = document.getElementById('d-status');
+    stEl.textContent = st[0]; stEl.className = 'pill ' + st[1];
+    var notes = document.getElementById('d-notes');
+    if (me.reviewNotes) { notes.style.display = 'block'; notes.innerHTML = '<b>Reviewer note:</b> ' + me.reviewNotes; }
+    else notes.style.display = 'none';
+
+    document.getElementById('s-votes').textContent = PFA.fmt(me.votes);
+    document.getElementById('s-pct').textContent = pct.toFixed(1) + '%';
+    document.getElementById('s-rank').textContent = rank > 0 ? '#' + rank + ' of ' + list.length : 'Unranked';
+    document.getElementById('s-gap').textContent = rank === 1 ? 'Leader' : (leader ? PFA.fmt(leader.votes - me.votes) : '–');
+    document.getElementById('s-updated').textContent = 'Last updated ' + PFA.fmtTime(me.updatedAt);
+    document.getElementById('d-board-title').textContent = 'Top 5 — ' + (cat ? cat.name : '');
+
+    /* final result after publication */
+    var s = PFA.settings(), fp = document.getElementById('final-panel');
+    if (s.resultsPublished && s.snapshot && me.status === 'approved') {
+      var row = (s.snapshot.categories[me.categoryId] || []).filter(function (r) { return r.nomineeId === me.id; })[0];
+      fp.style.display = 'block';
+      document.getElementById('final-text').innerHTML = row
+        ? '<b style="color:var(--gold-lt);font-size:18px">' + row.title + ' — Rank #' + row.rank + '</b><br>Congratulations! See you at the ceremony on December 11.'
+        : 'Thank you for taking part. You were not selected for the Top 5 this edition — the competition was fierce.';
+    } else fp.style.display = 'none';
+
+    var link = PFA.voteLink(me.id);
+    var linkActive = me.status === 'approved';
+    document.getElementById('vote-link').textContent = linkActive ? link : 'Activates after approval';
+    document.getElementById('link-sub').textContent = linkActive
+      ? 'Share this everywhere — every verified tap is a vote. One vote per person per category.'
+      : 'Your link activates as soon as your nomination is approved.';
+    document.getElementById('copy-link').onclick = function () {
+      if (!linkActive) { APP.toast('Available after approval'); return; }
+      APP.copyText(link, 'Voting link copied — share it everywhere');
+    };
+
+    var qr = document.getElementById('qr');
+    qr.innerHTML = '';
+    if (linkActive && window.QRCode) {
+      new QRCode(qr, { text: link, width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
+    } else if (linkActive) { qr.innerHTML = '<span class="hint">QR unavailable offline</span>'; }
+
+    var msg = encodeURIComponent('Vote for me at the ProFluencer Awards 2026! ' + (linkActive ? link : ''));
+    var u = encodeURIComponent(linkActive ? link : location.href);
+    document.getElementById('share-row').innerHTML =
+      '<a class="share-btn" target="_blank" rel="noopener" href="https://wa.me/?text=' + msg + '">WhatsApp</a>' +
+      '<a class="share-btn" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + u + '&text=' + msg + '">Telegram</a>' +
+      '<a class="share-btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + msg + '">X</a>' +
+      '<a class="share-btn" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=' + u + '">Facebook</a>';
+
+    document.getElementById('d-rows').innerHTML = list.slice(0, 5).map(function (x, i) {
+      var p = total > 0 ? (x.votes / total * 100) : 0;
+      var you = x.id === me.id;
+      return '<div class="lb-row' + (you ? ' you' : '') + '">' +
+        '<div class="rank' + (i === 0 ? ' r1' : '') + '">' + (i + 1) + '</div>' +
+        '<div class="avatar">' + PFA.initials(x.name) + '</div>' +
+        '<div class="lb-info"><b>' + x.name + (you ? ' · YOU' : '') + '</b><span>' + x.handle + ' · ' + x.platform + '</span>' +
+        '<div class="bar"><i style="width:' + p.toFixed(1) + '%"></i></div></div>' +
+        '<div class="lb-votes"><b>' + PFA.fmt(x.votes) + '</b><span>' + p.toFixed(1) + '%</span></div></div>';
+    }).join('') || '<div class="lb-row"><div class="lb-info"><span>No approved nominees in this category yet.</span></div></div>';
+  }
+
+  document.getElementById('d-logout').addEventListener('click', function () {
+    PFA.clearSession(); location.href = 'index.html';
+  });
+
+  render();
+  setInterval(render, 30000); /* spec: refresh every 30s */
+})();
+</script>
+</body>
+</html>

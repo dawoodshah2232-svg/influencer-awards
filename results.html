@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Results — ProFluencer Awards 2026</title>
+<meta name="description" content="The official ProFluencer Awards 2026 results: 50 winners across 10 industries, published after the December 11 ceremony.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="results">
+<header id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container" style="max-width:900px">
+    <span class="eyebrow">Official results</span>
+    <h1 class="sec-title">Winners of 2026</h1>
+    <p class="sec-sub" id="res-sub"></p>
+  </div>
+</div>
+
+<section style="padding-top:10px">
+  <div class="container" id="res-list" style="max-width:900px"></div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var s = PFA.settings(), sub = document.getElementById('res-sub'), list = document.getElementById('res-list');
+  if (!s.resultsPublished || !s.snapshot) {
+    sub.textContent = 'Voting closed November 30, 2026. Results are under final verification and will be published here after the ceremony on December 11, 2026.';
+    list.innerHTML = PFA.CATEGORIES.map(function (c) {
+      return '<div class="panel"><h3>' + c.name + '</h3><p class="sub">Results pending — announced live on stage, Dec 11.</p></div>';
+    }).join('');
+    return;
+  }
+  var v = s.snapshot.version;
+  sub.textContent = 'Published ' + new Date(s.snapshot.at).toLocaleDateString() + ' · snapshot v' + v + ' · 50 trophies across 10 industries.';
+  list.innerHTML = PFA.CATEGORIES.map(function (c) {
+    var rows = (s.snapshot.categories[c.id] || []).map(function (r, i) {
+      var n = PFA.get(r.nomineeId);
+      return '<div class="lb-row"><div class="rank' + (i === 0 ? ' r1' : '') + '">' + r.rank + '</div>' +
+        '<div class="avatar">' + PFA.initials(n ? n.name : '?') + '</div>' +
+        '<div class="lb-info"><b>' + r.name + '</b><span>' + (n ? n.handle + ' · ' + n.platform : '') + '</span></div>' +
+        '<div class="lb-votes"><b>' + r.votes + '</b><span>' + r.title + '</span></div></div>';
+    }).join('');
+    return '<div class="lb" style="margin-bottom:22px"><div class="lb-head"><h3>' + c.name + '</h3><span class="chip">' + (rows ? '5 honourees' : 'Pending') + '</span></div><div>' + (rows || '<div class="lb-row"><div class="lb-info"><span>Pending.</span></div></div>') + '</div></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

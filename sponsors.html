@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sponsors — ProFluencer Awards 2026</title>
+<meta name="description" content="Partner with the ProFluencer Awards 2026: reach 50 winning creators and millions of verified voters across 10 industries.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="sponsors">
+<header id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container" style="max-width:800px">
+    <span class="eyebrow">Partnerships</span>
+    <h1 class="sec-title">Put your brand on the golden stage</h1>
+    <p class="sec-sub">50 winning creators. 10 industries. Millions of verified voters. Sponsors get stage time, broadcast visibility and direct access to the region's most influential audience builders.</p>
+  </div>
+</div>
+
+<section style="padding-top:10px">
+  <div class="container">
+    <div class="steps" style="grid-template-columns:1fr">
+      <div class="step reveal"><div class="n">◆</div><h3>Presenting Partner</h3><p>Your brand opens the show. Trophy naming rights for a category, stage backdrop, broadcast idents and a dedicated winners' photo moment.</p></div>
+      <div class="step reveal"><div class="n">◆</div><h3>Category Sponsor</h3><p>Own one of the 10 industry categories. Present the awards live on stage and reach every nominee and voter in that vertical.</p></div>
+      <div class="step reveal"><div class="n">◆</div><h3>Gala & Experience Sponsor</h3><p>The after-party, red carpet, creator lounge and gift suite — the moments the internet actually shares.</p></div>
+    </div>
+    <div class="form-card reveal" style="max-width:640px;margin:30px auto 0">
+      <h3 style="margin-bottom:8px">Request the partnership deck</h3>
+      <p class="hint">Tell us about your brand — the partnerships team replies within two working days.</p>
+      <div class="form-ok" id="sp-ok" style="margin:14px 0">Thank you. Your request is with the partnerships team.</div>
+      <form id="sp-form" novalidate style="margin-top:14px">
+        <div class="form-error" id="sp-err"></div>
+        <div class="form-2col">
+          <div class="field"><label>Name *</label><input name="name" required></div>
+          <div class="field"><label>Company *</label><input name="company" required></div>
+        </div>
+        <div class="form-2col">
+          <div class="field"><label>Email *</label><input name="email" type="email" required></div>
+          <div class="field"><label>Tier of interest</label><select name="tier"><option>Presenting Partner</option><option>Category Sponsor</option><option>Gala & Experience Sponsor</option><option>Not sure yet</option></select></div>
+        </div>
+        <div class="field"><label>Message</label><textarea name="message" rows="3" placeholder="What are you hoping to achieve?"></textarea></div>
+        <button class="btn btn-gold btn-block" type="submit">Request deck</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var form = document.getElementById('sp-form'), err = document.getElementById('sp-err');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); err.style.display = 'none';
+    var fd = new FormData(form), d = {};
+    fd.forEach(function (v, k) { d[k] = String(v).trim(); });
+    if (!d.name || !d.company) { err.textContent = 'Please enter your name and company.'; err.style.display = 'block'; return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; err.style.display = 'block'; return; }
+    PFA.addEnquiry({ name: d.name + ' (' + d.company + ')', email: d.email, subject: 'Sponsorship — ' + (d.tier || ''), message: d.message || 'Requested the partnership deck.' });
+    document.getElementById('sp-ok').style.display = 'block';
+    form.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>

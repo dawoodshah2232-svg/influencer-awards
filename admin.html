@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin CRM — ProFluencer Awards 2026</title>
+<meta name="description" content="ProFluencer Awards organiser CRM: nominations, vote oversight, results, RSVP, enquiries, settings and audit.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.admin-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:6px}
+.admin-tabs button{flex:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 16px;border-radius:12px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.admin-tabs button.active{background:var(--gold);color:#141414;border-color:var(--gold)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+@media(min-width:900px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+.kpi b{font-size:26px;color:var(--gold-lt)}
+.kpi span{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
+.adm-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.adm-table th{text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.adm-table td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
+.adm-table tr:hover td{background:rgba(255,255,255,.02)}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.status-pill{font-size:10.5px;padding:4px 10px;border-radius:99px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.status-pill.submitted{background:rgba(96,165,250,.15);color:#93c5fd}
+.status-pill.changes_requested{background:rgba(251,191,36,.15);color:#fcd34d}
+.status-pill.approved{background:rgba(52,211,153,.15);color:#6ee7b7}
+.status-pill.rejected,.status-pill.disqualified,.status-pill.invalidated{background:rgba(248,113,113,.15);color:#fca5a5}
+.status-pill.counted{background:rgba(52,211,153,.15);color:#6ee7b7}
+.status-pill.held{background:rgba(251,191,36,.15);color:#fcd34d}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(min-width:760px){.filters{grid-template-columns:2fr 1fr 1fr}}
+.tier-note{font-size:12px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body data-page="admin">
+<header id="site-header"></header>
+
+<div class="page-hero" style="padding-bottom:26px">
+  <div class="container">
+
+    <div id="admin-gate" class="form-card" style="max-width:420px;margin:0 auto;display:none">
+      <h2 style="font-size:22px;margin-bottom:8px">Admin CRM</h2>
+      <p class="hint">Organiser sign-in. Production uses server sessions with multi-factor authentication.</p>
+      <div class="form-error" id="aerr"></div>
+      <div class="field"><label>Username</label><input id="auser" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input id="apass" type="password" autocomplete="current-password"></div>
+      <button class="btn btn-gold btn-block" id="alogin">Sign in</button>
+      <p class="hint center" style="margin-top:12px">Demo access: admin / profluencer2026</p>
+    </div>
+
+    <div id="admin-panel" style="display:none">
+      <div class="dash-head">
+        <div>
+          <span class="eyebrow">Organiser CRM</span>
+          <h2 id="crm-edition">ProFluencer Awards 2026</h2>
+          <p class="hint" style="margin-top:6px">Voting: <b id="crm-dates"></b> · <span id="crm-state"></span></p>
+        </div>
+        <button class="mini-btn" id="a-logout">Log out</button>
+      </div>
+
+      <div class="admin-tabs" id="tabs"></div>
+
+      <div id="tab-overview"></div>
+      <div id="tab-nominations" style="display:none"></div>
+      <div id="tab-votes" style="display:none"></div>
+      <div id="tab-results" style="display:none"></div>
+      <div id="tab-rsvp" style="display:none"></div>
+      <div id="tab-enquiries" style="display:none"></div>
+      <div id="tab-settings" style="display:none"></div>
+      <div id="tab-audit" style="display:none"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var TABS = [
+    ['overview', 'Overview'], ['nominations', 'Nominations'], ['votes', 'Votes'],
+    ['results', 'Results'], ['rsvp', 'RSVP'], ['enquiries', 'Enquiries'],
+    ['settings', 'Settings'], ['audit', 'Audit Log']
+  ];
+
+  function guard() {
+    if (!PFA.isAdmin()) {
+      document.getElementById('admin-gate').style.display = 'block';
+      document.getElementById('admin-panel').style.display = 'none';
+    } else {
+      document.getElementById('admin-gate').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      boot();
+    }
+  }
+
+  document.getElementById('alogin').addEventListener('click', function () {
+    var u = document.getElementById('auser').value, p = document.getElementById('apass').value;
+    if (PFA.adminLogin(u, p)) { guard(); }
+    else { var e = document.getElementById('aerr'); e.textContent = 'Invalid credentials.'; e.style.display = 'block'; }
+  });
+  document.getElementById('a-logout').addEventListener('click', function () {
+    PFA.adminLogout(); guard();
+  });
+
+  function pill(s) { return '<span class="status-pill ' + s + '">' + s.replace(/_/g, ' ') + '</span>'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+  function downloadCSV(name, rows) {
+    var csv = rows.map(function (r) {
+      return r.map(function (c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = name; a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  /* ---------------- OVERVIEW ---------------- */
+  function renderOverview() {
+    var db = null;
+    try { db = JSON.parse(localStorage.getItem('pfa_db_v2')); } catch (e) {}
+    db = db || { influencers: [], votes: [], rsvps: [], enquiries: [], settings: PFA.settings() };
+    var byStatus = {};
+    db.influencers.forEach(function (x) { byStatus[x.status] = (byStatus[x.status] || 0) + 1; });
+    var counted = 0, held = 0, invalid = 0;
+    db.votes.forEach(function (v) {
+      if (v.status === 'counted') counted++;
+      else if (v.status === 'held') held++;
+      else invalid++;
+    });
+    var s = PFA.settings();
+    document.getElementById('crm-edition').textContent = s.edition;
+    document.getElementById('crm-dates').textContent = 'Oct 15 – Nov 30, 2026';
+    document.getElementById('crm-state').innerHTML = 'State: <b>' + PFA.votingState().toUpperCase() + '</b> · Results ' + (s.resultsPublished ? 'PUBLISHED (v' + s.snapshotVersion + ')' : 'hidden');
+
+    document.getElementById('tab-overview').innerHTML =
+      '<div class="kpis">' +
+      '<div class="kpi"><b>' + db.influencers.length + '</b><span>Nominations total</span></div>' +
+      '<div class="kpi"><b>' + (byStatus.approved || 0) + '</b><span>Approved</span></div>' +
+      '<div class="kpi"><b>' + counted + '</b><span>Votes counted</span></div>' +
+      '<div class="kpi"><b>' + (byStatus.submitted || 0) + '</b><span>Awaiting review</span></div>' +
+      '<div class="kpi"><b>' + held + '</b><span>Votes held</span></div>' +
+      '<div class="kpi"><b>' + invalid + '</b><span>Votes invalidated</span></div>' +
+      '<div class="kpi"><b>' + db.rsvps.length + '</b><span>Ceremony RSVPs</span></div>' +
+      '<div class="kpi"><b>' + db.enquiries.filter(function (e) { return !e.read; }).length + '</b><span>Unread enquiries</span></div>' +
+      '</div>' +
+      '<div class="panel"><h3>Nominations by status</h3><p class="sub">' +
+      ['submitted', 'changes_requested', 'approved', 'rejected', 'withdrawn', 'disqualified']
+        .map(function (k) { return pill(k) + ' ' + (byStatus[k] || 0); }).join(' &nbsp;·&nbsp; ') +
+      '</p><p class="tier-note">Demo data is seeded locally and clearly separated from any future production records.</p></div>';
+  }
+
+  /* ---------------- NOMINATIONS ---------------- */
+  var nomFilter = { q: '', status: '', cat: '' };
+  function renderNominations() {
+    var el = document.getElementById('tab-nominations');
+    el.innerHTML =
+      '<div class="filters">' +
+      '<div class="field" style="margin:0"><input id="nf-q" placeholder="Search name, handle, email…" value="' + esc(nomFilter.q) + '"></div>' +
+      '<div class="field" style="margin:0"><select id="nf-status"><option value="">All statuses</option>' +
+      ['submitted', 'changes_requested', 'approved', 'rejected', 'withdrawn', 'disqualified']
+        .map(function (k) { return '<option value="' + k + '"' + (nomFilter.status === k ? ' selected' : '') + '>' + k.replace(/_/g, ' ') + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div class="field" style="margin:0"><select id="nf-cat"><option value="">All categories</option>' +
+      PFA.CATEGORIES.map(function (c) { return '<option value="' + c.id + '"' + (nomFilter.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>'; }).join('') +
+      '</select></div></div>' +
+      '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
+      '<th>Nominee</th><th>Category</th><th>Profile</th><th>Votes</th><th>Status</th><th>Actions</th></tr></thead><tbody id="nom-rows"></tbody></table></div>';
+
+    document.getElementById('nf-q').addEventListener('input', function () { nomFilter.q = this.value; drawNomRows(); });
+    document.getElementById('nf-status').addEventListener('change', function () { nomFilter.status = this.value; drawNomRows(); });
+    document.getElementById('nf-cat').addEventListener('change', function () { nomFilter.cat = this.value; drawNomRows(); });
+    drawNomRows();
+  }
+  function drawNomRows() {
+    var q = nomFilter.q.trim().toLowerCase();
+    var list = PFA.all().filter(function (x) {
+      if (nomFilter.status && x.status !== nomFilter.status) return false;
+      if (nomFilter.cat && x.categoryId !== nomFilter.cat) return false;
+      if (q && ((x.name || '') + ' ' + (x.handle || '') + ' ' + (x.email || '')).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    document.getElementById('nom-rows').innerHTML = list.map(function (x) {
+      var c = PFA.category(x.categoryId);
+      return '<tr><td><b>' + esc(x.name) + '</b><br><span style="color:var(--muted);font-size:12px">' + esc(x.email) + ' · ' + esc(x.mobile || '') + '<br>' + esc(x.city) + ', ' + esc(x.country) + (x.reviewNotes ? '<br><i>Note: ' + esc(x.reviewNotes) + '</i>' : '') + '</span></td>' +
+        '<td>' + (c ? esc(c.name) : '') + '</td>' +
+        '<td>' + esc(x.handle) + ' · ' + esc(x.platform) + '<br><span style="color:var(--muted);font-size:12px">' + esc(x.followers || '') + ' followers</span></td>' +
+        '<td><b>' + x.votes + '</b></td>' +
+        '<td>' + pill(x.status) + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="mini-btn" data-act="approve" data-id="' + x.id + '">Approve</button>' +
+        '<button class="mini-btn" data-act="changes" data-id="' + x.id + '">Request changes</button>' +
+        '<button class="mini-btn" data-act="reject" data-id="' + x.id + '">Reject</button>' +
+        '<button class="mini-btn" data-act="remove" data-id="' + x.id + '" style="color:#fca5a5">Remove</button>' +
+        '</div></td></tr>';
+    }).join('') || '<tr><td colspan="6" style="color:var(--muted)">No nominations match.</td></tr>';
+  }
+
+  /* ---------------- VOTES ---------------- */
+  function renderVotes() {
+    var el = document.getElementById('tab-votes');
+    var votes = PFA.recentVotes(100);
+    el.innerHTML =
+      '<div class="panel"><h3>Vote ledger — most recent 100</h3><p class="sub">Votes are never edited directly. Invalidate suspicious votes; totals recalculate automatically. Each record keeps its audit trail.</p>' +
+      '<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Time</th><th>Nominee</th><th>Category</th><th>Voter</th><th>Status</th><th>Action</th></tr></thead><tbody>' +
+      votes.map(function (v) {
+        var n = PFA.get(v.nomineeId);
+        var c = PFA.category(v.categoryId);
+        return '<tr><td style="white-space:nowrap">' + PFA.fmtTime(v.at) + '</td>' +
+          '<td>' + esc(n ? n.name : '(removed)') + '</td>' +
+          '<td>' + esc(c ? c.name : v.categoryId) + '</td>' +
+          '<td style="font-family:monospace;font-size:12px">…' + esc(v.voterHash.slice(-6)) + '</td>' +
+          '<td>' + pill(v.status) + (v.reason ? '<br><span style="color:var(--muted);font-size:12px">' + esc(v.reason) + '</span>' : '') + '</td>' +
+          '<td>' + (v.status === 'counted'
+            ? '<button class="mini-btn" data-vote="' + v.id + '" style="color:#fca5a5">Invalidate</button>'
+            : '<span style="color:var(--muted)">—</span>') + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>' +
+      '<button class="btn btn-ghost" id="exp-votes">Export votes CSV</button>';
+    document.getElementById('exp-votes').addEventListener('click', function () {
+      var rows = [['id', 'time', 'nominee', 'category', 'status', 'reason']];
+      PFA.recentVotes(5000).forEach(function (v) {
+        var n = PFA.get(v.nomineeId);
+        rows.push([v.id, new Date(v.at).toISOString(), n ? n.name : '', v.categoryId, v.status, v.reason || '']);
+      });
+      downloadCSV('votes.csv', rows);
+    });
+  }
+
+  /* ---------------- RESULTS ---------------- */
+  function renderResults() {
+    var el = document.getElementById('tab-results');
+    var s = PFA.settings();
+    var html = '<div class="panel"><h3>Result control</h3><p class="sub">Results stay hidden from the public until you publish. Publishing freezes a snapshot — rank 1 becomes Category Winner, ranks 2–5 become Top 5 Honourees. Ties are already broken deterministically (votes → earliest last vote → earliest approval).</p>' +
+      '<p style="margin:12px 0">Current state: <b>' + (s.resultsPublished ? 'PUBLISHED' : 'HIDDEN') + '</b>' +
+      (s.snapshot ? ' · snapshot v' + s.snapshot.version + ' · ' + new Date(s.snapshot.at).toLocaleString() : '') + '</p>' +
+      '<div class="row-actions">' +
+      (s.resultsPublished
+        ? '<button class="btn btn-ghost" id="res-unpub">Unpublish results</button>'
+        : '<button class="btn btn-gold" id="res-pub">Publish results</button>') +
+      '</div><p class="tier-note">Production requires two-person approval. Demo: type PUBLISH to confirm.</p></div>';
+
+    html += PFA.CATEGORIES.map(function (c) {
+      var top = PFA.top5(c.id);
+      var rows = top.map(function (x, i) {
+        return '<div class="lb-row" style="border:none;border-bottom:1px solid rgba(255,255,255,.05);border-radius:0;padding:10px 4px">' +
+          '<div class="rank' + (i === 0 ? ' r1' : '') + '">' + (i + 1) + '</div>' +
+          '<div class="lb-info"><b>' + esc(x.name) + '</b><span>' + esc(x.handle) + ' · ' + (i === 0 ? 'Category Winner' : 'Top 5 Honouree') + '</span></div>' +
+          '<div class="lb-votes"><b>' + x.votes + '</b></div></div>';
+      }).join('') || '<p class="hint">No approved nominees yet.</p>';
+      return '<div class="panel" style="margin-top:14px"><h3>' + esc(c.name) + '</h3>' + rows + '</div>';
+    }).join('');
+
+    el.innerHTML = html;
+
+    var pub = document.getElementById('res-pub');
+    if (pub) pub.addEventListener('click', function () {
+      if (prompt('Type PUBLISH to freeze and publish results:') === 'PUBLISH') {
+        PFA.publishResults(); renderResults(); renderOverview(); APP.toast('Results published');
+      }
+    });
+    var unp = document.getElementById('res-unpub');
+    if (unp) unp.addEventListener('click', function () {
+      if (confirm('Unpublish results from the public?')) {
+        PFA.unpublishResults(); renderResults(); renderOverview(); APP.toast('Results hidden');
+      }
+    });
+  }
+
+  /* ---------------- RSVP ---------------- */
+  function renderRsvp() {
+    var el = document.getElementById('tab-rsvp');
+    var rsvps = [];
+    try { rsvps = JSON.parse(localStorage.getItem('pfa_db_v2')).rsvps || []; } catch (e) {}
+    var checked = rsvps.filter(function (r) { return r.checkedIn; }).length;
+    el.innerHTML =
+      '<div class="kpis"><div class="kpi"><b>' + rsvps.length + '</b><span>Total RSVPs</span></div>' +
+      '<div class="kpi"><b>' + checked + '</b><span>Checked in</span></div></div>' +
+      '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
+      '<th>Name</th><th>Email</th><th>Type</th><th>Guests</th><th>Checked in</th></tr></thead><tbody>' +
+      rsvps.map(function (r) {
+        return '<tr><td><b>' + esc(r.name) + '</b></td><td>' + esc(r.email) + '</td><td>' + esc(r.type) + '</td>' +
+          '<td>' + r.guests + '</td><td><button class="mini-btn" data-rsvp="' + r.id + '">' + (r.checkedIn ? 'Yes — undo' : 'Check in') + '</button></td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<button class="btn btn-ghost" id="exp-rsvp">Export RSVP CSV</button>';
+    document.getElementById('exp-rsvp').addEventListener('click', function () {
+      var rows = [['name', 'email', 'mobile', 'type', 'guests', 'checked_in', 'at']];
+      rsvps.forEach(function (r) {
+        rows.push([r.name, r.email, r.mobile || '', r.type, r.guests, r.checkedIn ? 'yes' : 'no', new Date(r.at).toISOString()]);
+      });
+      downloadCSV('rsvps.csv', rows);
+    });
+  }
+
+  /* ---------------- ENQUIRIES ---------------- */
+  function renderEnquiries() {
+    var el = document.getElementById('tab-enquiries');
+    var enqs = [];
+    try { enqs = JSON.parse(localStorage.getItem('pfa_db_v2')).enquiries || []; } catch (e) {}
+    enqs = enqs.slice().reverse();
+    el.innerHTML = '<div class="panel">' + (enqs.map(function (e) {
+      return '<div style="border-bottom:1px solid rgba(255,255,255,.07);padding:14px 4px;opacity:' + (e.read ? '.6' : '1') + '">' +
+        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>' + esc(e.name) + '</b>' +
+        '<span class="hint">' + esc(e.email) + ' · ' + PFA.fmtTime(e.at) + '</span>' +
+        (e.read ? '' : '<span class="status-pill submitted">new</span>') +
+        '<span style="margin-left:auto">' + (e.read ? '' : '<button class="mini-btn" data-enq="' + e.id + '">Mark read</button>') + '</span></div>' +
+        (e.subject ? '<div style="font-weight:700;margin-top:6px">' + esc(e.subject) + '</div>' : '') +
+        '<p style="color:var(--muted);font-size:14px;margin-top:6px">' + esc(e.message) + '</p></div>';
+    }).join('') || '<p class="hint">No enquiries yet.</p>') + '</div>';
+  }
+
+  /* ---------------- SETTINGS ---------------- */
+  function renderSettings() {
+    var el = document.getElementById('tab-settings');
+    var s = PFA.settings();
+    el.innerHTML =
+      '<div class="form-card"><h3 style="margin-bottom:16px">Edition settings</h3>' +
+      '<div class="field"><label>Edition name</label><input id="st-edition" value="' + esc(s.edition) + '"></div>' +
+      '<div class="form-2col"><div class="field"><label>Voting opens</label><input id="st-start" type="datetime-local" value="2026-10-15T00:00"></div>' +
+      '<div class="field"><label>Voting closes</label><input id="st-end" type="datetime-local" value="2026-11-30T23:59"></div></div>' +
+      '<div class="field"><label>Ceremony</label><input id="st-cer" type="datetime-local" value="2026-12-11T15:00"></div>' +
+      '<div class="field"><label>Venue line</label><input id="st-venue" value="' + esc(s.ceremonyVenue) + '"></div>' +
+      '<div class="field"><label>Terms version</label><input id="st-terms" value="' + esc(s.termsVersion) + '"></div>' +
+      '<button class="btn btn-gold" id="st-save">Save settings</button>' +
+      '<p class="tier-note">Production: changing the voting window after opening requires dual approval and is audited.</p></div>' +
+      '<div class="form-card" style="border-color:#7f1d1d"><h3 style="margin-bottom:10px;color:#fca5a5">Danger zone</h3>' +
+      '<p class="hint">Reset all demo data (nominations, votes, RSVPs) back to the seeded state.</p>' +
+      '<button class="btn btn-ghost" id="st-reset" style="border-color:#7f1d1d;color:#fca5a5">Reset demo data</button></div>';
+
+    document.getElementById('st-save').addEventListener('click', function () {
+      function iso(v, dflt) { return dflt; } /* demo keeps canonical dates; edition name/venue/terms editable */
+      PFA.saveSettings({
+        edition: document.getElementById('st-edition').value.trim() || s.edition,
+        ceremonyVenue: document.getElementById('st-venue').value.trim(),
+        termsVersion: document.getElementById('st-terms').value.trim()
+      });
+      renderOverview(); APP.toast('Settings saved');
+    });
+    document.getElementById('st-reset').addEventListener('click', function () {
+      if (confirm('Reset ALL demo data to the seeded state? This cannot be undone.')) {
+        try { localStorage.removeItem('pfa_db_v2'); } catch (e) {}
+        renderOverview(); renderNominations(); APP.toast('Demo data reset');
+      }
+    });
+  }
+
+  /* ---------------- AUDIT ---------------- */
+  function renderAudit() {
+    var el = document.getElementById('tab-audit');
+    var rows = PFA.auditLog(100);
+    el.innerHTML = '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
+      '<th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead><tbody>' +
+      rows.map(function (a) {
+        return '<tr><td style="white-space:nowrap">' + PFA.fmtTime(a.at) + '</td><td>' + esc(a.actor) + '</td>' +
+          '<td style="font-family:monospace;font-size:12px">' + esc(a.action) + '</td><td style="color:var(--muted)">' + esc(a.detail || '') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  var renderers = {
+    overview: renderOverview, nominations: renderNominations, votes: renderVotes,
+    results: renderResults, rsvp: renderRsvp, enquiries: renderEnquiries,
+    settings: renderSettings, audit: renderAudit
+  };
+  var current = 'overview';
+
+  function showTab(key) {
+    current = key;
+    TABS.forEach(function (t) {
+      document.getElementById('tab-' + t[0]).style.display = t[0] === key ? 'block' : 'none';
+    });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.tab === key);
+    });
+    renderers[key]();
+  }
+
+  function boot() {
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML = TABS.map(function (t) {
+      return '<button data-tab="' + t[0] + '">' + t[1] + '</button>';
+    }).join('');
+    tabs.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () { showTab(b.dataset.tab); });
+    });
+    showTab('overview');
+  }
+
+  /* delegated actions */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-act]');
+    if (btn) {
+      var id = btn.dataset.id, act = btn.dataset.act;
+      if (act === 'approve') { PFA.setNominationStatus(id, 'approved'); APP.toast('Nomination approved — voting link live'); }
+      else if (act === 'changes') {
+        var n = prompt('Note for the influencer (what to fix):');
+        if (n === null) return;
+        PFA.setNominationStatus(id, 'changes_requested', n);
+        APP.toast('Changes requested');
+      }
+      else if (act === 'reject') {
+        var r = prompt('Rejection reason (visible to reviewer log):') || '';
+        PFA.setNominationStatus(id, 'rejected', r);
+        APP.toast('Nomination rejected');
+      }
+      else if (act === 'remove') {
+        if (!confirm('Remove this nomination entirely?')) return;
+        try {
+          var db = JSON.parse(localStorage.getItem('pfa_db_v2'));
+          db.influencers = db.influencers.filter(function (x) { return x.id !== id; });
+          db.audit.push({ at: Date.now(), actor: 'admin', action: 'nomination_removed', detail: id });
+          localStorage.setItem('pfa_db_v2', JSON.stringify(db));
+        } catch (err) {}
+        APP.toast('Nomination removed');
+      }
+      showTab('nominations');
+      return;
+    }
+    var vb = e.target.closest('[data-vote]');
+    if (vb) {
+      var reason = prompt('Reason for invalidating this vote:');
+      if (reason === null) return;
+      if (PFA.invalidateVote(vb.dataset.vote, reason)) APP.toast('Vote invalidated');
+      else APP.toast('Could not invalidate vote');
+      showTab('votes');
+      return;
+    }
+    var rb = e.target.closest('[data-rsvp]');
+    if (rb) { PFA.toggleCheckIn(rb.dataset.rsvp); showTab('rsvp'); return; }
+    var eb = e.target.closest('[data-enq]');
+    if (eb) { PFA.markEnquiryRead(eb.dataset.enq); showTab('enquiries'); renderOverview(); return; }
+  });
+
+  guard();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Influencer Login — ProFluencer Awards 2026</title>
+<meta name="description" content="Log in to your ProFluencer Awards influencer dashboard: live votes, vote share, rank, countdown and your personal voting link.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="login">
+<header id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container" style="max-width:520px">
+    <div class="center">
+      <img src="assets/img/logo.png" alt="ProFluencer Awards" style="width:96px;border-radius:22px;margin:0 auto 18px;box-shadow:0 10px 30px rgba(212,175,55,.3)">
+      <h1 class="sec-title" style="font-size:clamp(26px,5vw,36px)">Influencer Portal</h1>
+      <p class="sec-sub" style="margin:0 auto">Log in to track your votes live.</p>
+    </div>
+  </div>
+</div>
+
+<section style="padding-top:10px">
+  <div class="container" style="max-width:480px">
+    <div class="form-card">
+      <div class="form-error" id="ferr"></div>
+      <form id="login-form" novalidate>
+        <div class="field"><label>Email</label><input name="email" type="email" required placeholder="you@email.com" autocomplete="email"></div>
+        <div class="field"><label>Password</label><input name="password" type="password" required placeholder="Your password" autocomplete="current-password"></div>
+        <button class="btn btn-gold btn-block" type="submit">Log in to dashboard</button>
+        <p class="hint center" style="margin-top:14px">Not nominated yet? <a href="nominate.html" style="color:var(--gold-lt);font-weight:700">Create your nomination</a></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  if (PFA.session()) { location.href = 'dashboard.html'; return; }
+  var form = document.getElementById('login-form'), err = document.getElementById('ferr');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(form);
+    var inf = PFA.login(fd.get('email'), fd.get('password'));
+    if (!inf) {
+      err.textContent = 'Email or password not recognized. Check your details or nominate yourself first.';
+      err.style.display = 'block';
+      return;
+    }
+    location.href = 'dashboard.html';
+  });
+})();
+</script>
+</body>
+</html>

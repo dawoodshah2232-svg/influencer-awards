@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nominee Directory — ProFluencer Awards 2026</title>
+<meta name="description" content="Meet the approved nominees of the ProFluencer Awards 2026. Search by name, filter by category or platform, and vote for your favorites.">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.dir-tools{display:grid;grid-template-columns:1fr;gap:12px;margin:26px 0}
+@media(min-width:760px){.dir-tools{grid-template-columns:2fr 1fr 1fr}}
+.nom-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:640px){.nom-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.nom-grid{grid-template-columns:repeat(3,1fr)}}
+.nom-card{display:flex;gap:14px;background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;align-items:center;transition:transform .2s,box-shadow .2s}
+.nom-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.nom-card .avatar{width:58px;height:58px;font-size:20px;flex:none}
+.nom-card b{display:block;font-size:15.5px}
+.nom-card .meta{font-size:12.5px;color:var(--muted)}
+.nom-card .go{margin-left:auto;flex:none;color:var(--gold-lt);font-weight:800}
+</style>
+</head>
+<body data-page="nominees">
+<header id="site-header"></header>
+
+<div class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Approved nominees</span>
+    <h1 class="sec-title">Meet the contenders</h1>
+    <p class="sec-sub">Every profile below is reviewed and approved. Search, filter, open a profile and cast your verified vote.</p>
+    <div class="dir-tools">
+      <div class="field" style="margin:0"><input id="q" placeholder="Search by name or handle…" autocomplete="off"></div>
+      <div class="field" style="margin:0"><select id="fcat"><option value="">All categories</option></select></div>
+      <div class="field" style="margin:0"><select id="fplat"><option value="">All platforms</option></select></div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-top:0">
+  <div class="container">
+    <p class="hint" id="dir-count" style="margin-bottom:14px"></p>
+    <div class="nom-grid" id="dir-grid"></div>
+    <div class="center mt" id="dir-empty" style="display:none">
+      <p class="sec-sub">No nominees match your search yet.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  var q = document.getElementById('q'), fcat = document.getElementById('fcat'), fplat = document.getElementById('fplat');
+  var grid = document.getElementById('dir-grid'), empty = document.getElementById('dir-empty'), count = document.getElementById('dir-count');
+
+  PFA.CATEGORIES.forEach(function (c) {
+    var o = document.createElement('option'); o.value = c.id; o.textContent = c.name; fcat.appendChild(o);
+  });
+  var plats = {};
+  PFA.approved().forEach(function (x) { plats[x.platform] = 1; });
+  Object.keys(plats).sort().forEach(function (p) {
+    var o = document.createElement('option'); o.value = p; o.textContent = p; fplat.appendChild(o);
+  });
+
+  var preset = new URLSearchParams(location.search).get('cat');
+  if (preset) fcat.value = preset;
+
+  function render() {
+    var term = q.value.trim().toLowerCase();
+    var list = PFA.approved().filter(function (x) {
+      if (fcat.value && x.categoryId !== fcat.value) return false;
+      if (fplat.value && x.platform !== fplat.value) return false;
+      if (term && (x.name + ' ' + x.handle).toLowerCase().indexOf(term) === -1) return false;
+      return true;
+    });
+    count.textContent = list.length + ' approved nominee' + (list.length === 1 ? '' : 's');
+    empty.style.display = list.length ? 'none' : 'block';
+    grid.innerHTML = list.map(function (x) {
+      var c = PFA.category(x.categoryId);
+      return '<a class="nom-card" href="vote.html?id=' + encodeURIComponent(x.id) + '">' +
+        '<div class="avatar">' + PFA.initials(x.name) + '</div>' +
+        '<div style="min-width:0"><b>' + x.name + '</b>' +
+        '<div class="meta">' + x.handle + ' · ' + x.platform + '</div>' +
+        '<div class="meta" style="color:var(--gold-lt)">' + (c ? c.name : '') + '</div></div>' +
+        '<span class="go">Vote →</span></a>';
+    }).join('');
+  }
+
+  q.addEventListener('input', render);
+  fcat.addEventListener('change', render);
+  fplat.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
