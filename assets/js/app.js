@@ -19,7 +19,7 @@
     }).join('');
     return '' +
       '<div class="container nav-inner">' +
-        '<a class="brand" href="index.html"><img src="assets/img/logo-v2.png" alt="ProFluencer Awards Dubai 2026 logo"></a>' +
+        '<a class="brand" href="index.html"><img src="assets/img/logo-clean.png" alt="ProFluencer Awards Dubai 2026 logo"></a>' +
         '<nav class="nav-links">' + links + '</nav>' +
         '<a class="btn btn-gold btn-sm nav-cta" href="login.html">Influencer Login</a>' +
         '<button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>' +
@@ -37,7 +37,7 @@
       '<div class="container">' +
         '<div class="foot-grid">' +
           '<div>' +
-            '<a class="brand" href="index.html" style="margin-bottom:14px"><img src="assets/img/logo-v2.png" alt="ProFluencer Awards Dubai 2026 logo" style="height:54px"></a>' +
+            '<a class="brand" href="index.html" style="margin-bottom:14px"><img src="assets/img/logo-clean.png" alt="ProFluencer Awards Dubai 2026 logo" style="height:54px"></a>' +
             '<p style="color:var(--muted);font-size:14px;max-width:300px;margin-top:12px">The region\u2019s most prestigious celebration of digital influence. 10 industries, 50 awards, decided by public vote.</p>' +
           '</div>' +
           '<div><h4>Awards</h4>' +
