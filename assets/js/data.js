@@ -141,7 +141,7 @@
   function seed() {
     return {
       influencers: seedInfluencers(),
-      votes: [], audit: [], rsvps: [], enquiries: [],
+      voters: [], votes: [], audit: [], rsvps: [], enquiries: [],
       settings: defaultSettings()
     };
   }
@@ -300,73 +300,83 @@
       return location.origin + location.pathname.replace(/[^\/]*$/, '') + 'vote.html?id=' + encodeURIComponent(id);
     },
 
-    /* ---------- voter verification (demo OTP; production: real SMS provider) ---------- */
-    requestOtp: function (phone) {
-      phone = String(phone || '').replace(/\D/g, '');
-      if (phone.length < 7) return { ok: false, error: 'Enter a valid mobile number.' };
-      var code = String(Math.floor(100000 + Math.random() * 900000));
-      try {
-        localStorage.setItem(OTP_KEY, JSON.stringify({ phone: phone, code: code, expires: now() + 5 * 60000, attempts: 0 }));
-      } catch (e) {}
-      return { ok: true, demoCode: code };
-    },
-    verifyOtp: function (phone, code) {
-      var rec = null;
-      try { rec = JSON.parse(localStorage.getItem(OTP_KEY) || 'null'); } catch (e) {}
-      phone = String(phone || '').replace(/\D/g, '');
-      if (!rec || rec.phone !== phone) return { ok: false, error: 'No code requested for this number.' };
-      if (now() > rec.expires) return { ok: false, error: 'Code expired. Request a new one.' };
-      rec.attempts++;
-      try { localStorage.setItem(OTP_KEY, JSON.stringify(rec)); } catch (e) {}
-      if (rec.attempts > 5) return { ok: false, error: 'Too many attempts. Request a new code.' };
-      if (String(code).trim() !== rec.code) return { ok: false, error: 'Incorrect code. Try again.' };
-      try {
-        localStorage.setItem(VOTER_KEY, JSON.stringify({ voterHash: hashStr('pfa|' + phone), verifiedAt: now() }));
-        localStorage.removeItem(OTP_KEY);
-      } catch (e) {}
-      return { ok: true };
+    /* ---------- voter registration: one identity per email / phone ---------- */
+    normEmail: function (e) { return String(e || '').trim().toLowerCase(); },
+    normPhone: function (p) { return String(p || '').replace(/\D/g, ''); },
+    findVoter: function (email, phone) {
+      var vs = load().voters || [];
+      var eh = hashStr('pfa|email|' + PFA.normEmail(email));
+      var ph = hashStr('pfa|phone|' + PFA.normPhone(phone));
+      var byEmail = null, byPhone = null;
+      for (var i = 0; i < vs.length; i++) {
+        if (vs[i].emailHash === eh) byEmail = vs[i];
+        if (vs[i].phoneHash === ph) byPhone = vs[i];
+      }
+      return byEmail || byPhone || null;
     },
     currentVoter: function () {
-      try { return JSON.parse(localStorage.getItem(VOTER_KEY) || 'null'); } catch (e) { return null; }
+      var ref = null;
+      try { ref = JSON.parse(localStorage.getItem(VOTER_KEY) || 'null'); } catch (e) {}
+      if (!ref || !ref.voterId) return null;
+      var vs = load().voters || [];
+      for (var i = 0; i < vs.length; i++) if (vs[i].id === ref.voterId) return vs[i];
+      return null;
     },
     voterChoice: function (catId) {
       var v = PFA.currentVoter();
       if (!v) return null;
       var votes = load().votes;
       for (var i = votes.length - 1; i >= 0; i--) {
-        if (votes[i].voterHash === v.voterHash && votes[i].categoryId === catId && votes[i].status === 'counted') {
+        if (votes[i].voterId === v.id && votes[i].categoryId === catId && votes[i].status === 'counted') {
           return votes[i].nomineeId;
         }
       }
       return null;
     },
 
-    /* ---------- voting ---------- */
-    vote: function (nomineeId) {
+    /* ---------- voting: name + email + phone, one vote per category ---------- */
+    registerAndVote: function (nomineeId, info) {
       var db = load(), s = db.settings, t = now();
       if (t < new Date(s.votingStart).getTime()) return { ok: false, code: 'VOTING_NOT_OPEN' };
       if (t > new Date(s.votingEnd).getTime()) return { ok: false, code: 'VOTING_CLOSED' };
-      var voter = PFA.currentVoter();
-      if (!voter) return { ok: false, code: 'VERIFICATION_REQUIRED' };
+      var name = String((info && info.name) || '').trim();
+      var email = PFA.normEmail(info && info.email);
+      var phone = PFA.normPhone(info && info.phone);
+      if (name.length < 2) return { ok: false, code: 'INVALID_NAME' };
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, code: 'INVALID_EMAIL' };
+      if (phone.length < 7) return { ok: false, code: 'INVALID_PHONE' };
       var inf = null;
       for (var i = 0; i < db.influencers.length; i++) {
         if (db.influencers[i].id === nomineeId) { inf = db.influencers[i]; break; }
       }
       if (!inf || inf.status !== 'approved') return { ok: false, code: 'NOMINEE_INELIGIBLE' };
+      db.voters = db.voters || [];
+      var voter = PFA.findVoter(email, phone);
+      if (!voter) {
+        voter = {
+          id: uid('voter'), name: name,
+          emailHash: hashStr('pfa|email|' + email),
+          phoneHash: hashStr('pfa|phone|' + phone),
+          createdAt: t
+        };
+        db.voters.push(voter);
+      } else if (name && voter.name !== name) { voter.name = name; }
       for (var j = 0; j < db.votes.length; j++) {
         var v = db.votes[j];
-        if (v.voterHash === voter.voterHash && v.categoryId === inf.categoryId && v.status === 'counted') {
-          return { ok: false, code: 'ALREADY_VOTED' };
+        if (v.voterId === voter.id && v.categoryId === inf.categoryId && v.status === 'counted') {
+          try { localStorage.setItem(VOTER_KEY, JSON.stringify({ voterId: voter.id })); } catch (e) {}
+          return { ok: false, code: 'ALREADY_VOTED', nomineeId: v.nomineeId };
         }
       }
       var rec = {
         id: uid('vote'), nomineeId: inf.id, categoryId: inf.categoryId,
-        voterHash: voter.voterHash, at: t, status: 'counted', reason: ''
+        voterId: voter.id, at: t, status: 'counted', reason: ''
       };
       db.votes.push(rec);
       inf.votes += 1; inf.lastVoteAt = t; inf.updatedAt = t;
       db.audit.push({ at: t, actor: 'voter', action: 'vote_counted', detail: inf.name + ' (' + inf.categoryId + ')' });
       save(db);
+      try { localStorage.setItem(VOTER_KEY, JSON.stringify({ voterId: voter.id })); } catch (e) {}
       return { ok: true, votes: inf.votes };
     },
 

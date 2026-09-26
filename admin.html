@@ -213,7 +213,7 @@
         return '<tr><td style="white-space:nowrap">' + PFA.fmtTime(v.at) + '</td>' +
           '<td>' + esc(n ? n.name : '(removed)') + '</td>' +
           '<td>' + esc(c ? c.name : v.categoryId) + '</td>' +
-          '<td style="font-family:monospace;font-size:12px">…' + esc(v.voterHash.slice(-6)) + '</td>' +
+          '<td style="font-family:monospace;font-size:12px">…' + esc(String(v.voterId || '').slice(-6)) + '</td>' +
           '<td>' + pill(v.status) + (v.reason ? '<br><span style="color:var(--muted);font-size:12px">' + esc(v.reason) + '</span>' : '') + '</td>' +
           '<td>' + (v.status === 'counted'
             ? '<button class="mini-btn" data-vote="' + v.id + '" style="color:#fca5a5">Invalidate</button>'

@@ -53,7 +53,9 @@
 
   var cat = PFA.category(inf.categoryId);
   document.title = 'Vote for ' + inf.name + ' — ProFluencer Awards 2026';
-  document.getElementById('v-avatar').textContent = PFA.initials(inf.name);
+  var av = document.getElementById('v-avatar');
+  if (inf.photo) av.innerHTML = '<img src="' + inf.photo + '" alt="' + inf.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  else av.textContent = PFA.initials(inf.name);
   document.getElementById('v-cat').textContent = cat ? cat.name : '';
   document.getElementById('v-name').textContent = inf.name;
   document.getElementById('v-bio').textContent =
@@ -84,55 +86,41 @@
   }
 
   /* voting is open */
-  var voter = PFA.currentVoter();
-  var choice = PFA.voterChoice(inf.categoryId);
-
-  function voteButton() {
+  /* voting is open — simple registration: name, email, phone */
+  function regForm() {
+    var me = PFA.currentVoter();
     action.innerHTML =
-      '<button class="btn btn-gold big-vote" id="do-vote">Vote for ' + inf.name.split(' ')[0] + '</button>' +
-      '<p class="hint" style="margin-top:10px">One vote per category · verified voters only · closes Nov 30</p>';
-    document.getElementById('do-vote').addEventListener('click', function () {
-      var r = PFA.vote(inf.id);
-      if (r.ok) { APP.toast('Vote counted for ' + inf.name); render(); }
-      else if (r.code === 'ALREADY_VOTED') { APP.toast('You already voted in this category'); render(); }
-      else APP.toast('Vote could not be counted right now');
-    });
-  }
-
-  function otpStep() {
-    action.innerHTML =
-      '<div class="otp-box"><b>Verify your mobile to vote</b>' +
-      '<p class="hint">One verified mobile = one vote per category. This keeps the awards fair.</p>' +
-      '<div class="form-2col" style="margin-top:12px"><div class="field" style="margin:0"><input id="otp-phone" inputmode="tel" placeholder="+971 5X XXX XXXX"></div>' +
-      '<div class="field" style="margin:0"><button class="btn btn-gold btn-block" id="otp-send" style="padding:14px">Send code</button></div></div>' +
-      '<div id="otp-verify" style="display:none;margin-top:12px">' +
-      '<div class="demo-code" id="otp-demo"></div>' +
-      '<p class="hint center">Demo mode: the SMS code appears above. Production sends a real SMS.</p>' +
-      '<div class="form-2col" style="margin-top:8px"><div class="field" style="margin:0"><input id="otp-code" inputmode="numeric" maxlength="6" placeholder="6-digit code"></div>' +
-      '<div class="field" style="margin:0"><button class="btn btn-ghost btn-block" id="otp-check" style="padding:14px">Verify & continue</button></div></div>' +
-      '<p class="hint" id="otp-err" style="color:#fca5a5;display:none;margin-top:8px"></p></div></div>';
-    var phone = null;
-    document.getElementById('otp-send').addEventListener('click', function () {
-      phone = document.getElementById('otp-phone').value;
-      var r = PFA.requestOtp(phone);
-      if (!r.ok) { APP.toast(r.error); return; }
-      document.getElementById('otp-verify').style.display = 'block';
-      document.getElementById('otp-demo').textContent = r.demoCode;
-      APP.toast('Verification code sent (demo)');
-    });
-    document.getElementById('otp-check').addEventListener('click', function () {
-      var code = document.getElementById('otp-code').value;
-      var r = PFA.verifyOtp(phone, code);
-      var e = document.getElementById('otp-err');
-      if (!r.ok) { e.textContent = r.error; e.style.display = 'block'; return; }
-      APP.toast('Mobile verified — you can now vote');
-      render();
+      '<div class="otp-box"><b>Vote for ' + inf.name.split(' ')[0] + '</b>' +
+      '<p class="hint">Enter your details below — one person, one vote per category. Your email and phone are your voter ID: neither can be reused in this category.</p>' +
+      '<div class="field"><label>Full name *</label><input id="rv-name" autocomplete="name" placeholder="Your name"' + (me && me.name ? ' value="' + me.name.replace(/"/g, '&quot;') + '"' : '') + '></div>' +
+      '<div class="form-2col"><div class="field" style="margin:0"><label>Email *</label><input id="rv-email" type="email" autocomplete="email" placeholder="you@email.com"></div>' +
+      '<div class="field" style="margin:0"><label>Phone *</label><input id="rv-phone" type="tel" autocomplete="tel" placeholder="+971 5X XXX XXXX"></div></div>' +
+      '<p class="hint" id="rv-err" style="color:#fca5a5;display:none;margin-top:10px"></p>' +
+      '<button class="btn btn-gold btn-block big-vote" id="rv-submit" style="margin-top:14px">Submit my vote</button></div>';
+    document.getElementById('rv-submit').addEventListener('click', function () {
+      var err = document.getElementById('rv-err');
+      err.style.display = 'none';
+      var r = PFA.registerAndVote(inf.id, {
+        name: document.getElementById('rv-name').value,
+        email: document.getElementById('rv-email').value,
+        phone: document.getElementById('rv-phone').value
+      });
+      if (r.ok) { APP.toast('Vote counted for ' + inf.name); render(); return; }
+      if (r.code === 'ALREADY_VOTED') { APP.toast('You already voted in this category'); render(); return; }
+      err.textContent = {
+        INVALID_NAME: 'Please enter your full name.',
+        INVALID_EMAIL: 'Please enter a valid email address.',
+        INVALID_PHONE: 'Please enter a valid phone number.',
+        VOTING_NOT_OPEN: 'Voting has not opened yet.',
+        VOTING_CLOSED: 'Voting is closed.',
+        NOMINEE_INELIGIBLE: 'This nominee is not eligible.'
+      }[r.code] || 'Could not submit your vote. Try again.';
+      err.style.display = 'block';
     });
   }
 
   function render() {
-    voter = PFA.currentVoter();
-    choice = PFA.voterChoice(inf.categoryId);
+    var choice = PFA.voterChoice(inf.categoryId);
     if (choice === inf.id) {
       action.innerHTML = '<div class="voted-note">Your vote for ' + inf.name + ' is counted. Thank you.</div>' +
         '<p class="hint" style="margin-top:10px">You can still vote for one nominee in each of the other 9 categories.</p>';
@@ -140,10 +128,8 @@
       var other = PFA.get(choice);
       action.innerHTML = '<div class="state-note"><b style="color:var(--text)">You already voted in ' + (cat ? cat.name : 'this category') + '</b>' +
         (other ? ' — your vote went to ' + other.name + '.' : '.') + '<br>One vote per category; votes cannot be changed.</div>';
-    } else if (!voter) {
-      otpStep();
     } else {
-      voteButton();
+      regForm();
     }
   }
 
