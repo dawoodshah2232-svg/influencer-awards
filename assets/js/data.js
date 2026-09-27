@@ -364,6 +364,8 @@
       for (var j = 0; j < db.votes.length; j++) {
         var v = db.votes[j];
         if (v.voterId === voter.id && v.categoryId === inf.categoryId && v.status === 'counted') {
+          db.audit.push({ at: t, actor: 'voter', action: 'vote_blocked_duplicate', detail: inf.categoryId + ' — repeat attempt by voter …' + String(voter.id).slice(-6) });
+          save(db);
           try { localStorage.setItem(VOTER_KEY, JSON.stringify({ voterId: voter.id })); } catch (e) {}
           return { ok: false, code: 'ALREADY_VOTED', nomineeId: v.nomineeId };
         }
@@ -401,6 +403,110 @@
       save(db); return true;
     },
 
+    /* ---------- analytics (dashboards + integrity) ---------- */
+    votesFor: function (nomineeId) {
+      var vs = load().votes, out = [];
+      for (var i = 0; i < vs.length; i++) {
+        if (vs[i].nomineeId === nomineeId && vs[i].status === 'counted') out.push(vs[i]);
+      }
+      return out;
+    },
+    votesInLast: function (nomineeId, ms) {
+      var t = now() - ms, n = 0, list = PFA.votesFor(nomineeId);
+      for (var i = 0; i < list.length; i++) if (list[i].at >= t) n++;
+      return n;
+    },
+    /* counts per day, oldest -> newest; nomineeId null = all nominees */
+    votesPerDay: function (nomineeId, days) {
+      days = days || 14;
+      var counts = [], i, d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      for (i = 0; i < days; i++) counts.push(0);
+      var list = nomineeId ? PFA.votesFor(nomineeId)
+        : load().votes.filter(function (v) { return v.status === 'counted'; });
+      for (i = 0; i < list.length; i++) {
+        var dt = new Date(list[i].at); dt.setHours(0, 0, 0, 0);
+        var diff = Math.round((d0 - dt) / 86400000);
+        if (diff >= 0 && diff < days) counts[days - 1 - diff]++;
+      }
+      var out = [];
+      for (i = 0; i < days; i++) {
+        var dd = new Date(d0.getTime() - (days - 1 - i) * 86400000);
+        var label;
+        try { label = dd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+        catch (e) { label = (dd.getMonth() + 1) + '/' + dd.getDate(); }
+        out.push({ label: label, count: counts[i] });
+      }
+      return out;
+    },
+    /* counted votes per hour, oldest -> newest (spike detection) */
+    votesPerHour: function (hours) {
+      hours = hours || 24;
+      var counts = [], i, t0 = now();
+      for (i = 0; i < hours; i++) counts.push(0);
+      var vs = load().votes;
+      for (i = 0; i < vs.length; i++) {
+        if (vs[i].status !== 'counted') continue;
+        var diff = Math.floor((t0 - vs[i].at) / 3600000);
+        if (diff >= 0 && diff < hours) counts[hours - 1 - diff]++;
+      }
+      return counts;
+    },
+    newVotersPerDay: function (days) {
+      days = days || 7;
+      var counts = [], i, d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      for (i = 0; i < days; i++) counts.push(0);
+      var vs = load().voters || [];
+      for (i = 0; i < vs.length; i++) {
+        var dt = new Date(vs[i].createdAt || now()); dt.setHours(0, 0, 0, 0);
+        var diff = Math.round((d0 - dt) / 86400000);
+        if (diff >= 0 && diff < days) counts[days - 1 - diff]++;
+      }
+      var out = [];
+      for (i = 0; i < days; i++) {
+        var dd = new Date(d0.getTime() - (days - 1 - i) * 86400000);
+        var label;
+        try { label = dd.toLocaleDateString('en-GB', { weekday: 'short' }); }
+        catch (e) { label = 'd' + (i + 1); }
+        out.push({ label: label, count: counts[i] });
+      }
+      return out;
+    },
+    voterStats: function () {
+      var db = load(), vs = db.voters || [], votes = db.votes;
+      var multi = 0, todayN = 0, day0 = new Date(); day0.setHours(0, 0, 0, 0);
+      var t0 = day0.getTime();
+      for (var i = 0; i < vs.length; i++) {
+        var cats = {}, n = 0;
+        for (var j = 0; j < votes.length; j++) {
+          if (votes[j].voterId === vs[i].id && votes[j].status === 'counted' && !cats[votes[j].categoryId]) {
+            cats[votes[j].categoryId] = 1; n++;
+          }
+        }
+        if (n > 1) multi++;
+        if ((vs[i].createdAt || 0) >= t0) todayN++;
+      }
+      var counted = 0;
+      for (var k = 0; k < votes.length; k++) if (votes[k].status === 'counted') counted++;
+      return {
+        total: vs.length, counted: counted,
+        avg: vs.length ? counted / vs.length : 0,
+        multi: multi, today: todayN
+      };
+    },
+    blockedAttempts: function () {
+      var n = 0, a = load().audit;
+      for (var i = 0; i < a.length; i++) if (a[i].action === 'vote_blocked_duplicate') n++;
+      return n;
+    },
+    votesByCategory: function () {
+      var out = {}, vs = load().votes;
+      CATEGORIES.forEach(function (c) { out[c.id] = 0; });
+      for (var i = 0; i < vs.length; i++) {
+        if (vs[i].status === 'counted' && out[vs[i].categoryId] !== undefined) out[vs[i].categoryId]++;
+      }
+      return out;
+    },
+
     /* ---------- results ---------- */
     publishResults: function () {
       var db = load(), cats = {};
@@ -411,6 +517,9 @@
       });
       db.settings.snapshotVersion += 1;
       db.settings.snapshot = { version: db.settings.snapshotVersion, at: now(), by: 'admin', categories: cats };
+      db.settings.snapshotHistory = db.settings.snapshotHistory || [];
+      db.settings.snapshotHistory.unshift(db.settings.snapshot);
+      db.settings.snapshotHistory = db.settings.snapshotHistory.slice(0, 10);
       db.settings.resultsPublished = true;
       db.audit.push({ at: now(), actor: 'admin', action: 'results_published', detail: 'snapshot v' + db.settings.snapshotVersion });
       save(db); return db.settings.snapshot;

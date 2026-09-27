@@ -5,10 +5,39 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Dashboard — ProFluencer Awards 2026</title>
-<meta name="description" content="Your ProFluencer Awards dashboard: nomination status, live votes, vote share, rank, countdown, top 5 showcase and your personal voting link with QR code.">
+<meta name="description" content="Your ProFluencer Awards dashboard: nomination status, live votes, momentum, milestones, rank, countdown, top 5 showcase and your personal voting link with QR code.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+.mstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.mstat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 8px;text-align:center}
+.mstat b{font-size:20px;color:var(--gold-lt);display:block}
+.mstat span{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+.vchart{display:flex;align-items:flex-end;gap:5px;height:140px;padding-top:10px}
+.vchart .vbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.vchart .vbar i{display:block;width:100%;max-width:36px;background:linear-gradient(180deg,var(--gold-lt),var(--gold));border-radius:5px 5px 2px 2px;min-height:3px}
+.vchart .vbar span{font-size:9.5px;color:var(--muted);margin-top:6px;white-space:nowrap}
+.vchart .vbar.today i{background:linear-gradient(180deg,#6ee7b7,#10b981)}
+.vchart-legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px}
+.mile{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px}
+.mile:last-child{border-bottom:none}
+.mile .mtrack{grid-column:1/-1;height:8px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.mile .mtrack i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:99px}
+.mile.done .mtitle{color:var(--gold-lt);font-weight:700}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(212,175,55,.15);color:var(--gold-lt);border:1px solid rgba(212,175,55,.4)}
+.badge.locked{background:rgba(255,255,255,.04);color:var(--muted);border-color:rgba(255,255,255,.12)}
+.tpl{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 14px;margin:10px 0;font-size:13.5px;line-height:1.55}
+.tpl .tpl-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;font-weight:800}
+.tpl button{margin-top:8px}
+.tips{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:13.5px;line-height:1.7}
+.tips b{color:var(--text)}
+.ceremony-grid{display:grid;gap:10px;margin-top:12px}
+@media(min-width:700px){.ceremony-grid{grid-template-columns:1fr 1fr}}
+.ceremony-card{background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.25);border-radius:14px;padding:14px}
+.ceremony-card b{display:block;color:var(--gold-lt);margin-bottom:4px;font-size:14px}
+.ceremony-card span{font-size:13px;color:var(--muted);line-height:1.5}
+</style>
 </head>
 <body data-page="dashboard">
 <header id="site-header"></header>
@@ -43,6 +72,25 @@
     </div>
 
     <div class="panel">
+      <h3>Vote momentum</h3>
+      <p class="sub" id="momentum-sub">How fast your votes are coming in.</p>
+      <div class="mstats">
+        <div class="mstat"><b id="m-today">0</b><span>Votes today</span></div>
+        <div class="mstat"><b id="m-week">0</b><span>Last 7 days</span></div>
+        <div class="mstat"><b id="m-best">0</b><span>Best day</span></div>
+      </div>
+      <div id="m-chart"></div>
+      <div class="vchart-legend"><span>14 days ago</span><span>Today</span></div>
+      <p class="hint" style="margin-top:10px" id="m-activity"></p>
+    </div>
+
+    <div class="panel">
+      <h3>Milestones</h3>
+      <p class="sub">Every vote counts — unlock badges as your campaign grows.</p>
+      <div id="milestones"></div>
+    </div>
+
+    <div class="panel">
       <h3>Your personal voting link</h3>
       <p class="sub" id="link-sub">Share this everywhere — every verified tap is a vote. One vote per person per category.</p>
       <div class="linkbox"><code id="vote-link"></code><button class="btn btn-gold btn-sm" id="copy-link">Copy link</button></div>
@@ -56,8 +104,22 @@
     </div>
 
     <div class="panel">
+      <h3>Campaign toolkit</h3>
+      <p class="sub">Ready-made messages — copy, paste, post. Personalise the first line for best results.</p>
+      <div class="tpl"><div class="tpl-label">WhatsApp broadcast</div><div id="tpl-wa"></div><button class="mini-btn" data-copytpl="tpl-wa">Copy message</button></div>
+      <div class="tpl"><div class="tpl-label">Instagram / TikTok caption</div><div id="tpl-ig"></div><button class="mini-btn" data-copytpl="tpl-ig">Copy caption</button></div>
+      <div class="tpl"><div class="tpl-label">Story / status text</div><div id="tpl-story"></div><button class="mini-btn" data-copytpl="tpl-story">Copy text</button></div>
+      <ul class="tips">
+        <li><b>Post when your audience is awake</b> — evenings (7–10 PM GST) usually perform best in the UAE.</li>
+        <li><b>Ask twice:</b> once in your post, once in stories — most votes come from the second ask.</li>
+        <li><b>Pin your voting link</b> in your bio and story highlights for the whole voting window.</li>
+        <li><b>Reply to every comment</b> on campaign posts — it doubles the reach of the post.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
       <h3 id="cd-title">Countdown to voting close</h3>
-      <p class="sub">Voting closes November 30, 2026 · 11:59 PM GST · Winners crowned Dec 11 afternoon</p>
+      <p class="sub">Voting closes November 30, 2026 · Winners crowned Dec 11, afternoon session, Dubai</p>
       <div class="countdown" style="margin-top:4px">
         <div class="cd-cell"><b data-cd-d>00</b><span>Days</span></div>
         <div class="cd-cell"><b data-cd-h>00</b><span>Hours</span></div>
@@ -69,6 +131,17 @@
     <div class="lb" id="d-board">
       <div class="lb-head"><h3 id="d-board-title">Top 5 — your category</h3><span class="chip">Live · provisional</span></div>
       <div id="d-rows"></div>
+    </div>
+
+    <div class="panel">
+      <h3>The ceremony</h3>
+      <p class="sub">December 11, 2026 — afternoon session, Dubai. Here is what is at stake:</p>
+      <div class="ceremony-grid">
+        <div class="ceremony-card"><b>Category Winner</b><span>Rank #1 in each category takes the golden trophy on stage — 10 winners total.</span></div>
+        <div class="ceremony-card"><b>Top 5 Honourees</b><span>Ranks #2–5 in each category are honoured on stage — 40 honourees total.</span></div>
+        <div class="ceremony-card"><b>50 awards</b><span>10 categories × top 5 — the region's biggest creator celebration.</span></div>
+        <div class="ceremony-card"><b>Your moment</b><span>Finalists are announced after verification. Keep campaigning until voting closes.</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -92,6 +165,9 @@
     approved: ['APPROVED', 'ok'], rejected: ['REJECTED', 'pend'],
     withdrawn: ['WITHDRAWN', 'pend'], disqualified: ['DISQUALIFIED', 'pend']
   };
+  var MILESTONES = [10, 50, 100, 250, 500, 1000];
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
   function render() {
     me = PFA.get(me.id);
@@ -114,7 +190,7 @@
     var stEl = document.getElementById('d-status');
     stEl.textContent = st[0]; stEl.className = 'pill ' + st[1];
     var notes = document.getElementById('d-notes');
-    if (me.reviewNotes) { notes.style.display = 'block'; notes.innerHTML = '<b>Reviewer note:</b> ' + me.reviewNotes; }
+    if (me.reviewNotes) { notes.style.display = 'block'; notes.innerHTML = '<b>Reviewer note:</b> ' + esc(me.reviewNotes); }
     else notes.style.display = 'none';
 
     document.getElementById('s-votes').textContent = PFA.fmt(me.votes);
@@ -124,13 +200,45 @@
     document.getElementById('s-updated').textContent = 'Last updated ' + PFA.fmtTime(me.updatedAt);
     document.getElementById('d-board-title').textContent = 'Top 5 — ' + (cat ? cat.name : '');
 
+    /* momentum */
+    var perDay = PFA.votesPerDay(me.id, 14);
+    var best = 0;
+    perDay.forEach(function (d) { if (d.count > best) best = d.count; });
+    document.getElementById('m-today').textContent = PFA.fmt(PFA.votesInLast(me.id, 24 * 3600 * 1000));
+    document.getElementById('m-week').textContent = PFA.fmt(PFA.votesInLast(me.id, 7 * 24 * 3600 * 1000));
+    document.getElementById('m-best').textContent = PFA.fmt(best);
+    var max = 1;
+    perDay.forEach(function (d) { if (d.count > max) max = d.count; });
+    document.getElementById('m-chart').innerHTML = '<div class="vchart">' + perDay.map(function (d, i) {
+      var h = Math.max(3, Math.round(d.count / max * 112));
+      var cls = i === perDay.length - 1 ? 'vbar today' : 'vbar';
+      return '<div class="' + cls + '" title="' + d.label + ': ' + d.count + ' votes"><i style="height:' + h + 'px"></i><span>' + d.label + '</span></div>';
+    }).join('') + '</div>';
+    var lastHour = PFA.votesInLast(me.id, 3600 * 1000);
+    var lastDay = PFA.votesInLast(me.id, 24 * 3600 * 1000);
+    document.getElementById('m-activity').textContent =
+      lastHour > 0 ? lastHour + ' vote' + (lastHour === 1 ? '' : 's') + ' in the last hour — momentum is building!' :
+      lastDay > 0 ? 'No votes in the last hour, but ' + lastDay + ' in the last 24h. Time to share your link again.' :
+      'No votes yet in the last 24h — share your voting link to get moving.';
+
+    /* milestones */
+    var next = null;
+    document.getElementById('milestones').innerHTML = MILESTONES.map(function (m) {
+      var done = me.votes >= m;
+      if (!done && next === null) next = m;
+      var w = Math.min(100, Math.round(me.votes / m * 100));
+      return '<div class="mile' + (done ? ' done' : '') + '"><span class="mtitle">' + PFA.fmt(m) + ' votes</span>' +
+        '<span class="' + (done ? 'badge' : 'badge locked') + '">' + (done ? 'Unlocked' : PFA.fmt(m - me.votes) + ' to go') + '</span>' +
+        '<div class="mtrack"><i style="width:' + w + '%"></i></div></div>';
+    }).join('');
+
     /* final result after publication */
     var s = PFA.settings(), fp = document.getElementById('final-panel');
     if (s.resultsPublished && s.snapshot && me.status === 'approved') {
       var row = (s.snapshot.categories[me.categoryId] || []).filter(function (r) { return r.nomineeId === me.id; })[0];
       fp.style.display = 'block';
       document.getElementById('final-text').innerHTML = row
-        ? '<b style="color:var(--gold-lt);font-size:18px">' + row.title + ' — Rank #' + row.rank + '</b><br>Congratulations! See you at the ceremony on December 11.'
+        ? '<b style="color:var(--gold-lt);font-size:18px">' + esc(row.title) + ' — Rank #' + row.rank + '</b><br>Congratulations! See you at the ceremony on December 11.'
         : 'Thank you for taking part. You were not selected for the Top 5 this edition — the competition was fierce.';
     } else fp.style.display = 'none';
 
@@ -144,6 +252,15 @@
       if (!linkActive) { APP.toast('Available after approval'); return; }
       APP.copyText(link, 'Voting link copied — share it everywhere');
     };
+
+    /* campaign toolkit */
+    var first = me.name.split(' ')[0];
+    var wa = 'Hi! I\u2019m nominated for the ProFluencer Awards 2026 (' + (cat ? cat.name : 'my category') + '). Your vote takes 30 seconds and would mean the world to me: ' + (linkActive ? link : '');
+    var ig = 'I\u2019m nominated for the ProFluencer Awards 2026 \uD83C\uDFC6 (' + (cat ? cat.name : 'my category') + ')! Tap the link in my bio to vote — one vote per person, it takes 30 seconds. Thank you! \uD83D\uDE4F #ProFluencerAwards #Dubai2026';
+    var story = 'VOTE FOR ME \u2B06\uFE0F ProFluencer Awards 2026 \u2014 link in bio! Every vote counts.';
+    document.getElementById('tpl-wa').textContent = wa;
+    document.getElementById('tpl-ig').textContent = ig;
+    document.getElementById('tpl-story').textContent = story;
 
     var qr = document.getElementById('qr');
     qr.innerHTML = '';
@@ -165,7 +282,7 @@
       return '<div class="lb-row' + (you ? ' you' : '') + '">' +
         '<div class="rank' + (i === 0 ? ' r1' : '') + '">' + (i + 1) + '</div>' +
         '<div class="avatar">' + PFA.initials(x.name) + '</div>' +
-        '<div class="lb-info"><b>' + x.name + (you ? ' · YOU' : '') + '</b><span>' + x.handle + ' · ' + x.platform + '</span>' +
+        '<div class="lb-info"><b>' + esc(x.name) + (you ? ' · YOU' : '') + '</b><span>' + esc(x.handle) + ' · ' + esc(x.platform) + '</span>' +
         '<div class="bar"><i style="width:' + p.toFixed(1) + '%"></i></div></div>' +
         '<div class="lb-votes"><b>' + PFA.fmt(x.votes) + '</b><span>' + p.toFixed(1) + '%</span></div></div>';
     }).join('') || '<div class="lb-row"><div class="lb-info"><span>No approved nominees in this category yet.</span></div></div>';
@@ -173,6 +290,14 @@
 
   document.getElementById('d-logout').addEventListener('click', function () {
     PFA.clearSession(); location.href = 'index.html';
+  });
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copytpl]');
+    if (b) {
+      var t = document.getElementById(b.dataset.copytpl);
+      if (t) APP.copyText(t.textContent, 'Copied — paste it anywhere');
+    }
   });
 
   render();

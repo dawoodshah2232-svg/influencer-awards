@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Admin CRM — ProFluencer Awards 2026</title>
-<meta name="description" content="ProFluencer Awards organiser CRM: nominations, vote oversight, results, RSVP, enquiries, settings and audit.">
+<meta name="description" content="ProFluencer Awards organiser CRM: nominations, voters, vote oversight, integrity, results, RSVP, enquiries, settings and audit.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 <style>
@@ -17,11 +17,12 @@
 .kpi{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
 .kpi b{font-size:26px;color:var(--gold-lt)}
 .kpi span{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
+.kpi small{display:block;font-size:11px;color:var(--muted);margin-top:6px}
 .adm-table{width:100%;border-collapse:collapse;font-size:13.5px}
 .adm-table th{text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.1)}
 .adm-table td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
 .adm-table tr:hover td{background:rgba(255,255,255,.02)}
-.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .status-pill{font-size:10.5px;padding:4px 10px;border-radius:99px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .status-pill.submitted{background:rgba(96,165,250,.15);color:#93c5fd}
 .status-pill.changes_requested{background:rgba(251,191,36,.15);color:#fcd34d}
@@ -32,6 +33,51 @@
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 @media(min-width:760px){.filters{grid-template-columns:2fr 1fr 1fr}}
 .tier-note{font-size:12px;color:var(--muted);margin-top:10px}
+.cols{display:grid;gap:14px;margin-bottom:14px}
+@media(min-width:900px){.cols.two{grid-template-columns:1fr 1fr}}
+/* phase timeline */
+.timeline{display:flex;margin:4px 0 2px}
+.tstep{flex:1;text-align:center;position:relative;padding-top:28px;font-size:12px;color:var(--muted);min-width:0}
+.tstep b{display:block;font-size:12.5px}
+.tstep small{font-size:11px}
+.tstep::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);z-index:1}
+.tstep.done::before{background:var(--gold);border-color:var(--gold)}
+.tstep.now::before{background:var(--gold-lt);border-color:var(--gold-lt);box-shadow:0 0 0 6px rgba(212,175,55,.18)}
+.tstep.now{color:var(--text)}
+.tstep.now b{color:var(--gold-lt)}
+.tstep::after{content:'';position:absolute;top:15px;left:calc(-50% + 12px);right:calc(50% + 12px);height:2px;background:rgba(255,255,255,.12)}
+.tstep:first-child::after{display:none}
+.tstep.done::after{background:var(--gold)}
+/* vertical bar chart */
+.vchart{display:flex;align-items:flex-end;gap:5px;height:160px;padding-top:10px}
+.vchart .vbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.vchart .vbar i{display:block;width:100%;max-width:36px;background:linear-gradient(180deg,var(--gold-lt),var(--gold));border-radius:5px 5px 2px 2px;min-height:3px}
+.vchart .vbar span{font-size:9.5px;color:var(--muted);margin-top:6px;white-space:nowrap}
+.vchart .vbar.today i{background:linear-gradient(180deg,#6ee7b7,#10b981)}
+.vchart-legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px}
+/* horizontal bars */
+.hbar-row{display:grid;grid-template-columns:minmax(110px,170px) 1fr 52px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
+.hbar-row .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar-track{background:rgba(255,255,255,.06);border-radius:99px;height:10px;overflow:hidden}
+.hbar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:99px;min-width:2px}
+.hbar-row .num{text-align:right;font-weight:800;color:var(--gold-lt)}
+/* alerts + feed */
+.alert{border-radius:14px;padding:14px 16px;font-size:13.5px;margin-bottom:14px;line-height:1.5}
+.alert.warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);color:#fde68a}
+.alert.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:#a7f3d0}
+.alert b{color:#fff}
+.feed-item{display:flex;gap:12px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;align-items:baseline}
+.feed-item:last-child{border-bottom:none}
+.feed-item time{color:var(--muted);font-size:11px;white-space:nowrap;min-width:118px}
+.feed-item code{font-size:11.5px;color:var(--gold-lt)}
+.progress{height:12px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin:10px 0 4px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:99px}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.catchip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-size:12.5px}
+.catchip b{color:var(--gold-lt)}
+.checkcell input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.snap-row{display:flex;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;flex-wrap:wrap}
+.snap-row:last-child{border-bottom:none}
 </style>
 </head>
 <body data-page="admin">
@@ -64,6 +110,7 @@
 
       <div id="tab-overview"></div>
       <div id="tab-nominations" style="display:none"></div>
+      <div id="tab-voters" style="display:none"></div>
       <div id="tab-votes" style="display:none"></div>
       <div id="tab-results" style="display:none"></div>
       <div id="tab-rsvp" style="display:none"></div>
@@ -82,7 +129,7 @@
 <script>
 (function () {
   var TABS = [
-    ['overview', 'Overview'], ['nominations', 'Nominations'], ['votes', 'Votes'],
+    ['overview', 'Overview'], ['nominations', 'Nominations'], ['voters', 'Voters'], ['votes', 'Votes'],
     ['results', 'Results'], ['rsvp', 'RSVP'], ['enquiries', 'Enquiries'],
     ['settings', 'Settings'], ['audit', 'Audit Log']
   ];
@@ -120,11 +167,32 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
   }
 
+  function vchart(data, highlightLast) {
+    var max = 1;
+    data.forEach(function (d) { if (d.count > max) max = d.count; });
+    return '<div class="vchart">' + data.map(function (d, i) {
+      var h = Math.max(3, Math.round(d.count / max * 128));
+      var cls = (highlightLast && i === data.length - 1) ? 'vbar today' : 'vbar';
+      return '<div class="' + cls + '" title="' + d.label + ': ' + d.count + '"><i style="height:' + h + 'px"></i><span>' + d.label + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  function hbars(rows) {
+    var max = 1;
+    rows.forEach(function (r) { if (r.value > max) max = r.value; });
+    return rows.map(function (r) {
+      var w = Math.max(2, Math.round(r.value / max * 100));
+      return '<div class="hbar-row"><span class="lbl">' + esc(r.label) + '</span>' +
+        '<div class="hbar-track"><div class="hbar-fill" style="width:' + w + '%"></div></div>' +
+        '<span class="num">' + PFA.fmt(r.value) + '</span></div>';
+    }).join('');
+  }
+
   /* ---------------- OVERVIEW ---------------- */
   function renderOverview() {
     var db = null;
     try { db = JSON.parse(localStorage.getItem('pfa_db_v2')); } catch (e) {}
-    db = db || { influencers: [], votes: [], rsvps: [], enquiries: [], settings: PFA.settings() };
+    db = db || { influencers: [], votes: [], voters: [], rsvps: [], enquiries: [], settings: PFA.settings() };
     var byStatus = {};
     db.influencers.forEach(function (x) { byStatus[x.status] = (byStatus[x.status] || 0) + 1; });
     var counted = 0, held = 0, invalid = 0;
@@ -134,32 +202,82 @@
       else invalid++;
     });
     var s = PFA.settings();
+    var state = PFA.votingState();
     document.getElementById('crm-edition').textContent = s.edition;
     document.getElementById('crm-dates').textContent = 'Oct 15 – Nov 30, 2026';
-    document.getElementById('crm-state').innerHTML = 'State: <b>' + PFA.votingState().toUpperCase() + '</b> · Results ' + (s.resultsPublished ? 'PUBLISHED (v' + s.snapshotVersion + ')' : 'hidden');
+    document.getElementById('crm-state').innerHTML = 'State: <b>' + state.toUpperCase() + '</b> · Results ' + (s.resultsPublished ? 'PUBLISHED (v' + s.snapshotVersion + ')' : 'hidden');
+
+    /* phase timeline */
+    var steps;
+    if (state === 'upcoming') steps = [['Nominations', 'Collecting profiles', 'now'], ['Voting', 'Oct 15 – Nov 30', ''], ['Verification', 'Fraud review', ''], ['Ceremony', 'Dec 11 · Dubai', '']];
+    else if (state === 'open') steps = [['Nominations', 'Complete', 'done'], ['Voting', 'Oct 15 – Nov 30', 'now'], ['Verification', 'After close', ''], ['Ceremony', 'Dec 11 · Dubai', '']];
+    else steps = [['Nominations', 'Complete', 'done'], ['Voting', 'Closed Nov 30', 'done'], ['Verification', s.resultsPublished ? 'Complete' : 'In review', s.resultsPublished ? 'done' : 'now'], ['Ceremony', 'Dec 11 · Dubai', s.resultsPublished ? 'now' : '']];
+
+    /* integrity */
+    var blocked = PFA.blockedAttempts();
+    var perHour = PFA.votesPerHour(24);
+    var hsum = perHour.reduce(function (a, b) { return a + b; }, 0);
+    var hmax = Math.max.apply(null, perHour);
+    var spike = hsum > 0 && hmax > Math.max(12, (hsum / 24) * 4);
+    var integrity = spike
+      ? '<div class="alert warn"><b>Unusual voting spike detected.</b> One hour in the last 24 saw ' + hmax + ' votes vs an hourly average of ' + (hsum / 24).toFixed(1) + '. Review the Votes tab and hold suspicious records before publishing results.</div>'
+      : '<div class="alert ok"><b>Integrity looks healthy.</b> No abnormal hourly spikes in the last 24 hours. ' + blocked + ' duplicate-vote attempts blocked so far.</div>';
+
+    /* recent activity */
+    var feed = PFA.auditLog(8).map(function (a) {
+      return '<div class="feed-item"><time>' + PFA.fmtTime(a.at) + '</time><div><code>' + esc(a.action) + '</code> <span style="color:var(--muted)">· ' + esc(a.actor) + (a.detail ? ' · ' + esc(a.detail) : '') + '</span></div></div>';
+    }).join('') || '<p class="hint">No activity yet.</p>';
+
+    /* category leaderboard */
+    var byCat = PFA.votesByCategory();
+    var catRows = PFA.CATEGORIES.map(function (c) { return { label: c.name, value: byCat[c.id] || 0 }; })
+      .sort(function (a, b) { return b.value - a.value; });
 
     document.getElementById('tab-overview').innerHTML =
+      '<div class="panel" style="margin-bottom:14px"><h3>Edition timeline</h3>' +
+      '<div class="timeline">' + steps.map(function (st) {
+        return '<div class="tstep ' + st[2] + '"><b>' + st[0] + '</b><small>' + st[1] + '</small></div>';
+      }).join('') + '</div></div>' +
+
       '<div class="kpis">' +
-      '<div class="kpi"><b>' + db.influencers.length + '</b><span>Nominations total</span></div>' +
-      '<div class="kpi"><b>' + (byStatus.approved || 0) + '</b><span>Approved</span></div>' +
-      '<div class="kpi"><b>' + counted + '</b><span>Votes counted</span></div>' +
-      '<div class="kpi"><b>' + (byStatus.submitted || 0) + '</b><span>Awaiting review</span></div>' +
-      '<div class="kpi"><b>' + held + '</b><span>Votes held</span></div>' +
-      '<div class="kpi"><b>' + invalid + '</b><span>Votes invalidated</span></div>' +
-      '<div class="kpi"><b>' + db.rsvps.length + '</b><span>Ceremony RSVPs</span></div>' +
-      '<div class="kpi"><b>' + db.enquiries.filter(function (e) { return !e.read; }).length + '</b><span>Unread enquiries</span></div>' +
+      '<div class="kpi"><b>' + db.influencers.length + '</b><span>Nominations total</span><small>' + (byStatus.submitted || 0) + ' awaiting review</small></div>' +
+      '<div class="kpi"><b>' + (byStatus.approved || 0) + '</b><span>Approved nominees</span><small>across 10 categories</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(counted) + '</b><span>Votes counted</span><small>' + PFA.fmt(held) + ' held · ' + PFA.fmt(invalid) + ' invalidated</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt((db.voters || []).length) + '</b><span>Registered voters</span><small>email + phone verified identity</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(blocked) + '</b><span>Duplicate attempts blocked</span><small>same email/phone, same category</small></div>' +
+      '<div class="kpi"><b>' + db.rsvps.length + '</b><span>Ceremony RSVPs</span><small>' + db.rsvps.filter(function (r) { return r.checkedIn; }).length + ' checked in</small></div>' +
+      '<div class="kpi"><b>' + db.enquiries.filter(function (e) { return !e.read; }).length + '</b><span>Unread enquiries</span><small>' + db.enquiries.length + ' total</small></div>' +
+      '<div class="kpi"><b>' + (s.resultsPublished ? 'LIVE' : 'HIDDEN') + '</b><span>Results status</span><small>' + (s.snapshot ? 'snapshot v' + s.snapshot.version : 'not published yet') + '</small></div>' +
       '</div>' +
+
+      integrity +
+
+      '<div class="cols two">' +
+      '<div class="panel"><h3>Votes per day — last 14 days</h3>' + vchart(PFA.votesPerDay(null, 14), true) +
+      '<div class="vchart-legend"><span>Older</span><span>Today</span></div></div>' +
+      '<div class="panel"><h3>Votes by category</h3>' + hbars(catRows) + '</div>' +
+      '</div>' +
+
+      '<div class="cols two">' +
       '<div class="panel"><h3>Nominations by status</h3><p class="sub">' +
       ['submitted', 'changes_requested', 'approved', 'rejected', 'withdrawn', 'disqualified']
         .map(function (k) { return pill(k) + ' ' + (byStatus[k] || 0); }).join(' &nbsp;·&nbsp; ') +
-      '</p><p class="tier-note">Demo data is seeded locally and clearly separated from any future production records.</p></div>';
+      '</p><p class="tier-note">Demo data is seeded locally and clearly separated from any future production records.</p></div>' +
+      '<div class="panel"><h3>Recent activity</h3>' + feed + '</div>' +
+      '</div>';
   }
 
   /* ---------------- NOMINATIONS ---------------- */
   var nomFilter = { q: '', status: '', cat: '' };
   function renderNominations() {
     var el = document.getElementById('tab-nominations');
+    var chips = PFA.CATEGORIES.map(function (c) {
+      var list = PFA.byCategory(c.id, false);
+      var ap = list.filter(function (x) { return x.status === 'approved'; }).length;
+      return '<span class="catchip">' + esc(c.name) + ' · <b>' + ap + '/' + list.length + '</b> approved</span>';
+    }).join('');
     el.innerHTML =
+      '<div class="chip-row">' + chips + '</div>' +
       '<div class="filters">' +
       '<div class="field" style="margin:0"><input id="nf-q" placeholder="Search name, handle, email…" value="' + esc(nomFilter.q) + '"></div>' +
       '<div class="field" style="margin:0"><select id="nf-status"><option value="">All statuses</option>' +
@@ -169,12 +287,56 @@
       '<div class="field" style="margin:0"><select id="nf-cat"><option value="">All categories</option>' +
       PFA.CATEGORIES.map(function (c) { return '<option value="' + c.id + '"' + (nomFilter.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>'; }).join('') +
       '</select></div></div>' +
+      '<div class="row-actions" style="margin-bottom:10px">' +
+      '<button class="mini-btn" id="bulk-approve">Approve selected</button>' +
+      '<button class="mini-btn" id="bulk-changes">Request changes</button>' +
+      '<button class="mini-btn" id="bulk-reject" style="color:#fca5a5">Reject selected</button>' +
+      '<span class="hint" id="bulk-count"></span></div>' +
       '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
+      '<th class="checkcell"><input type="checkbox" id="nom-all"></th>' +
       '<th>Nominee</th><th>Category</th><th>Profile</th><th>Votes</th><th>Status</th><th>Actions</th></tr></thead><tbody id="nom-rows"></tbody></table></div>';
 
     document.getElementById('nf-q').addEventListener('input', function () { nomFilter.q = this.value; drawNomRows(); });
     document.getElementById('nf-status').addEventListener('change', function () { nomFilter.status = this.value; drawNomRows(); });
     document.getElementById('nf-cat').addEventListener('change', function () { nomFilter.cat = this.value; drawNomRows(); });
+    document.getElementById('nom-all').addEventListener('change', function () {
+      var boxes = document.querySelectorAll('.nom-check');
+      for (var i = 0; i < boxes.length; i++) boxes[i].checked = this.checked;
+      updateBulkCount();
+    });
+    function updateBulkCount() {
+      var n = document.querySelectorAll('.nom-check:checked').length;
+      document.getElementById('bulk-count').textContent = n ? n + ' selected' : '';
+    }
+    function selectedIds() {
+      var ids = [], boxes = document.querySelectorAll('.nom-check:checked');
+      for (var i = 0; i < boxes.length; i++) ids.push(boxes[i].dataset.id);
+      return ids;
+    }
+    document.getElementById('bulk-approve').addEventListener('click', function () {
+      var ids = selectedIds();
+      if (!ids.length) { APP.toast('Select nominations first'); return; }
+      ids.forEach(function (id) { PFA.setNominationStatus(id, 'approved'); });
+      APP.toast(ids.length + ' approved — voting links live'); drawNomRows(); renderOverview();
+    });
+    document.getElementById('bulk-changes').addEventListener('click', function () {
+      var ids = selectedIds();
+      if (!ids.length) { APP.toast('Select nominations first'); return; }
+      var n = prompt('Note for the influencers (what to fix):');
+      if (n === null) return;
+      ids.forEach(function (id) { PFA.setNominationStatus(id, 'changes_requested', n); });
+      APP.toast('Changes requested'); drawNomRows();
+    });
+    document.getElementById('bulk-reject').addEventListener('click', function () {
+      var ids = selectedIds();
+      if (!ids.length) { APP.toast('Select nominations first'); return; }
+      if (!confirm('Reject ' + ids.length + ' nominations?')) return;
+      ids.forEach(function (id) { PFA.setNominationStatus(id, 'rejected', 'Bulk review'); });
+      APP.toast(ids.length + ' rejected'); drawNomRows(); renderOverview();
+    });
+    el.addEventListener('change', function (e) {
+      if (e.target.classList && e.target.classList.contains('nom-check')) updateBulkCount();
+    });
     drawNomRows();
   }
   function drawNomRows() {
@@ -187,10 +349,11 @@
     });
     document.getElementById('nom-rows').innerHTML = list.map(function (x) {
       var c = PFA.category(x.categoryId);
-      return '<tr><td><b>' + esc(x.name) + '</b><br><span style="color:var(--muted);font-size:12px">' + esc(x.email) + ' · ' + esc(x.mobile || '') + '<br>' + esc(x.city) + ', ' + esc(x.country) + (x.reviewNotes ? '<br><i>Note: ' + esc(x.reviewNotes) + '</i>' : '') + '</span></td>' +
+      return '<tr><td class="checkcell"><input type="checkbox" class="nom-check" data-id="' + x.id + '"></td>' +
+        '<td><b>' + esc(x.name) + '</b><br><span style="color:var(--muted);font-size:12px">' + esc(x.email) + ' · ' + esc(x.mobile || '') + '<br>' + esc(x.city) + ', ' + esc(x.country) + (x.reviewNotes ? '<br><i>Note: ' + esc(x.reviewNotes) + '</i>' : '') + '</span></td>' +
         '<td>' + (c ? esc(c.name) : '') + '</td>' +
         '<td>' + esc(x.handle) + ' · ' + esc(x.platform) + '<br><span style="color:var(--muted);font-size:12px">' + esc(x.followers || '') + ' followers</span></td>' +
-        '<td><b>' + x.votes + '</b></td>' +
+        '<td><b>' + PFA.fmt(x.votes) + '</b></td>' +
         '<td>' + pill(x.status) + '</td>' +
         '<td><div class="row-actions">' +
         '<button class="mini-btn" data-act="approve" data-id="' + x.id + '">Approve</button>' +
@@ -198,15 +361,49 @@
         '<button class="mini-btn" data-act="reject" data-id="' + x.id + '">Reject</button>' +
         '<button class="mini-btn" data-act="remove" data-id="' + x.id + '" style="color:#fca5a5">Remove</button>' +
         '</div></td></tr>';
-    }).join('') || '<tr><td colspan="6" style="color:var(--muted)">No nominations match.</td></tr>';
+    }).join('') || '<tr><td colspan="7" style="color:var(--muted)">No nominations match.</td></tr>';
+  }
+
+  /* ---------------- VOTERS ---------------- */
+  function renderVoters() {
+    var el = document.getElementById('tab-voters');
+    var st = PFA.voterStats();
+    el.innerHTML =
+      '<div class="kpis">' +
+      '<div class="kpi"><b>' + PFA.fmt(st.total) + '</b><span>Registered voters</span><small>unique email + phone identities</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(st.counted) + '</b><span>Votes counted</span><small>across all categories</small></div>' +
+      '<div class="kpi"><b>' + st.avg.toFixed(1) + '</b><span>Avg votes per voter</span><small>max possible: 10 (one per category)</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(st.multi) + '</b><span>Multi-category voters</span><small>voted in 2+ categories</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(st.today) + '</b><span>New voters today</span><small>first-time identities</small></div>' +
+      '<div class="kpi"><b>' + PFA.fmt(PFA.blockedAttempts()) + '</b><span>Duplicate attempts blocked</span><small>repeat email/phone per category</small></div>' +
+      '</div>' +
+      '<div class="panel"><h3>New voters per day — last 7 days</h3>' + vchart(PFA.newVotersPerDay(7), true) +
+      '<div class="vchart-legend"><span>7 days ago</span><span>Today</span></div>' +
+      '<p class="tier-note">Privacy: voter emails and phone numbers are stored as one-way hashes and never displayed. One identity = one vote per category; the same identity may vote in other categories.</p></div>';
   }
 
   /* ---------------- VOTES ---------------- */
+  var voteStatusFilter = '';
   function renderVotes() {
     var el = document.getElementById('tab-votes');
-    var votes = PFA.recentVotes(100);
+    var all = PFA.recentVotes(5000).filter(function (v) { return !voteStatusFilter || v.status === voteStatusFilter; });
+    var votes = all.slice(0, 100);
+    var perHour = PFA.votesPerHour(24);
+    var hmax = Math.max.apply(null, perHour.concat([1]));
+    var hourly = '<div style="display:flex;align-items:flex-end;gap:3px;height:70px;margin-top:8px">' +
+      perHour.map(function (c) {
+        var h = Math.max(2, Math.round(c / hmax * 64));
+        return '<div style="flex:1;background:linear-gradient(180deg,var(--gold-lt),var(--gold));border-radius:3px 3px 1px 1px;height:' + h + 'px" title="' + c + ' votes"></div>';
+      }).join('') + '</div><div class="vchart-legend"><span>24h ago</span><span>Now</span></div>';
+
     el.innerHTML =
-      '<div class="panel"><h3>Vote ledger — most recent 100</h3><p class="sub">Votes are never edited directly. Invalidate suspicious votes; totals recalculate automatically. Each record keeps its audit trail.</p>' +
+      '<div class="panel"><h3>Voting velocity — last 24 hours</h3><p class="sub">Counted votes per hour. Sudden spikes can indicate coordinated voting — investigate before publishing results.</p>' + hourly + '</div>' +
+      '<div class="filters" style="grid-template-columns:1fr;margin-top:14px;max-width:320px">' +
+      '<div class="field" style="margin:0"><select id="vf-status"><option value="">All statuses</option>' +
+      ['counted', 'held', 'invalidated'].map(function (k) { return '<option value="' + k + '"' + (voteStatusFilter === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') +
+      '</select></div></div>' +
+      '<div class="panel"><h3>Vote ledger — most recent 100' + (voteStatusFilter ? ' (' + voteStatusFilter + ')' : '') + '</h3>' +
+      '<p class="sub">Votes are never edited directly. Invalidate suspicious votes; totals recalculate automatically. Each record keeps its audit trail. Showing ' + votes.length + ' of ' + all.length + ' matching.</p>' +
       '<div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Time</th><th>Nominee</th><th>Category</th><th>Voter</th><th>Status</th><th>Action</th></tr></thead><tbody>' +
       votes.map(function (v) {
         var n = PFA.get(v.nomineeId);
@@ -221,6 +418,7 @@
             : '<span style="color:var(--muted)">—</span>') + '</td></tr>';
       }).join('') + '</tbody></table></div></div>' +
       '<button class="btn btn-ghost" id="exp-votes">Export votes CSV</button>';
+    document.getElementById('vf-status').addEventListener('change', function () { voteStatusFilter = this.value; renderVotes(); });
     document.getElementById('exp-votes').addEventListener('click', function () {
       var rows = [['id', 'time', 'nominee', 'category', 'status', 'reason']];
       PFA.recentVotes(5000).forEach(function (v) {
@@ -244,13 +442,22 @@
         : '<button class="btn btn-gold" id="res-pub">Publish results</button>') +
       '</div><p class="tier-note">Production requires two-person approval. Demo: type PUBLISH to confirm.</p></div>';
 
+    var hist = s.snapshotHistory || [];
+    if (hist.length) {
+      html += '<div class="panel" style="margin-top:14px"><h3>Snapshot history</h3><p class="sub">Every publication freezes a versioned snapshot. Older versions are kept for audit.</p>' +
+        hist.map(function (sn, i) {
+          return '<div class="snap-row"><b>v' + sn.version + '</b><span style="color:var(--muted)">' + new Date(sn.at).toLocaleString() + '</span>' +
+            (i === 0 && s.resultsPublished ? '<span class="status-pill approved">live</span>' : '<span class="hint">superseded</span>') + '</div>';
+        }).join('') + '</div>';
+    }
+
     html += PFA.CATEGORIES.map(function (c) {
       var top = PFA.top5(c.id);
       var rows = top.map(function (x, i) {
         return '<div class="lb-row" style="border:none;border-bottom:1px solid rgba(255,255,255,.05);border-radius:0;padding:10px 4px">' +
           '<div class="rank' + (i === 0 ? ' r1' : '') + '">' + (i + 1) + '</div>' +
           '<div class="lb-info"><b>' + esc(x.name) + '</b><span>' + esc(x.handle) + ' · ' + (i === 0 ? 'Category Winner' : 'Top 5 Honouree') + '</span></div>' +
-          '<div class="lb-votes"><b>' + x.votes + '</b></div></div>';
+          '<div class="lb-votes"><b>' + PFA.fmt(x.votes) + '</b></div></div>';
       }).join('') || '<p class="hint">No approved nominees yet.</p>';
       return '<div class="panel" style="margin-top:14px"><h3>' + esc(c.name) + '</h3>' + rows + '</div>';
     }).join('');
@@ -277,9 +484,17 @@
     var rsvps = [];
     try { rsvps = JSON.parse(localStorage.getItem('pfa_db_v2')).rsvps || []; } catch (e) {}
     var checked = rsvps.filter(function (r) { return r.checkedIn; }).length;
+    var guests = rsvps.reduce(function (a, r) { return a + (r.guests || 1); }, 0);
+    var byType = {};
+    rsvps.forEach(function (r) { byType[r.type] = (byType[r.type] || 0) + 1; });
+    var pct = rsvps.length ? Math.round(checked / rsvps.length * 100) : 0;
     el.innerHTML =
-      '<div class="kpis"><div class="kpi"><b>' + rsvps.length + '</b><span>Total RSVPs</span></div>' +
-      '<div class="kpi"><b>' + checked + '</b><span>Checked in</span></div></div>' +
+      '<div class="kpis"><div class="kpi"><b>' + rsvps.length + '</b><span>Total RSVPs</span><small>' + guests + ' total guests incl. +1s</small></div>' +
+      '<div class="kpi"><b>' + checked + '</b><span>Checked in</span><small>' + pct + '% arrival rate</small></div>' +
+      '<div class="kpi"><b>' + (rsvps.length - checked) + '</b><span>Yet to arrive</span><small>ceremony: Dec 11, afternoon</small></div>' +
+      '<div class="kpi"><b>' + Object.keys(byType).length + '</b><span>Guest types</span><small>' + Object.keys(byType).map(function (k) { return k + ': ' + byType[k]; }).join(' · ') + '</small></div></div>' +
+      '<div class="panel"><h3>Check-in progress</h3><div class="progress"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="hint">' + checked + ' of ' + rsvps.length + ' checked in (' + pct + '%)</p></div>' +
       '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
       '<th>Name</th><th>Email</th><th>Type</th><th>Guests</th><th>Checked in</th></tr></thead><tbody>' +
       rsvps.map(function (r) {
@@ -302,15 +517,19 @@
     var enqs = [];
     try { enqs = JSON.parse(localStorage.getItem('pfa_db_v2')).enquiries || []; } catch (e) {}
     enqs = enqs.slice().reverse();
-    el.innerHTML = '<div class="panel">' + (enqs.map(function (e) {
-      return '<div style="border-bottom:1px solid rgba(255,255,255,.07);padding:14px 4px;opacity:' + (e.read ? '.6' : '1') + '">' +
-        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>' + esc(e.name) + '</b>' +
-        '<span class="hint">' + esc(e.email) + ' · ' + PFA.fmtTime(e.at) + '</span>' +
-        (e.read ? '' : '<span class="status-pill submitted">new</span>') +
-        '<span style="margin-left:auto">' + (e.read ? '' : '<button class="mini-btn" data-enq="' + e.id + '">Mark read</button>') + '</span></div>' +
-        (e.subject ? '<div style="font-weight:700;margin-top:6px">' + esc(e.subject) + '</div>' : '') +
-        '<p style="color:var(--muted);font-size:14px;margin-top:6px">' + esc(e.message) + '</p></div>';
-    }).join('') || '<p class="hint">No enquiries yet.</p>') + '</div>';
+    var unread = enqs.filter(function (e) { return !e.read; }).length;
+    el.innerHTML = '<div class="kpis" style="grid-template-columns:repeat(2,1fr);max-width:520px">' +
+      '<div class="kpi"><b>' + unread + '</b><span>Unread</span></div>' +
+      '<div class="kpi"><b>' + enqs.length + '</b><span>Total enquiries</span></div></div>' +
+      '<div class="panel">' + (enqs.map(function (e) {
+        return '<div style="border-bottom:1px solid rgba(255,255,255,.07);padding:14px 4px;opacity:' + (e.read ? '.6' : '1') + '">' +
+          '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>' + esc(e.name) + '</b>' +
+          '<span class="hint">' + esc(e.email) + ' · ' + PFA.fmtTime(e.at) + '</span>' +
+          (e.read ? '' : '<span class="status-pill submitted">new</span>') +
+          '<span style="margin-left:auto">' + (e.read ? '' : '<button class="mini-btn" data-enq="' + e.id + '">Mark read</button>') + '</span></div>' +
+          (e.subject ? '<div style="font-weight:700;margin-top:6px">' + esc(e.subject) + '</div>' : '') +
+          '<p style="color:var(--muted);font-size:14px;margin-top:6px">' + esc(e.message) + '</p></div>';
+      }).join('') || '<p class="hint">No enquiries yet.</p>') + '</div>';
   }
 
   /* ---------------- SETTINGS ---------------- */
@@ -328,11 +547,10 @@
       '<button class="btn btn-gold" id="st-save">Save settings</button>' +
       '<p class="tier-note">Production: changing the voting window after opening requires dual approval and is audited.</p></div>' +
       '<div class="form-card" style="border-color:#7f1d1d"><h3 style="margin-bottom:10px;color:#fca5a5">Danger zone</h3>' +
-      '<p class="hint">Reset all demo data (nominations, votes, RSVPs) back to the seeded state.</p>' +
+      '<p class="hint">Reset all demo data (nominations, votes, voters, RSVPs) back to the seeded state.</p>' +
       '<button class="btn btn-ghost" id="st-reset" style="border-color:#7f1d1d;color:#fca5a5">Reset demo data</button></div>';
 
     document.getElementById('st-save').addEventListener('click', function () {
-      function iso(v, dflt) { return dflt; } /* demo keeps canonical dates; edition name/venue/terms editable */
       PFA.saveSettings({
         edition: document.getElementById('st-edition').value.trim() || s.edition,
         ceremonyVenue: document.getElementById('st-venue').value.trim(),
@@ -352,7 +570,10 @@
   function renderAudit() {
     var el = document.getElementById('tab-audit');
     var rows = PFA.auditLog(100);
-    el.innerHTML = '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
+    var blocked = rows.filter(function (a) { return a.action === 'vote_blocked_duplicate'; }).length;
+    el.innerHTML = '<div class="alert ok" style="margin-bottom:14px"><b>Audit integrity:</b> append-only log. ' + rows.length + ' recent entries shown' +
+      (blocked ? ' · ' + blocked + ' duplicate-vote blocks' : '') + '. Production stores this immutably with UTC timestamps.</div>' +
+      '<div class="panel" style="overflow-x:auto"><table class="adm-table"><thead><tr>' +
       '<th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead><tbody>' +
       rows.map(function (a) {
         return '<tr><td style="white-space:nowrap">' + PFA.fmtTime(a.at) + '</td><td>' + esc(a.actor) + '</td>' +
@@ -361,7 +582,7 @@
   }
 
   var renderers = {
-    overview: renderOverview, nominations: renderNominations, votes: renderVotes,
+    overview: renderOverview, nominations: renderNominations, voters: renderVoters, votes: renderVotes,
     results: renderResults, rsvp: renderRsvp, enquiries: renderEnquiries,
     settings: renderSettings, audit: renderAudit
   };
