@@ -7,6 +7,19 @@
 <title>My Dashboard — ProFluencer Awards 2026</title>
 <meta name="description" content="Your ProFluencer Awards dashboard: nomination status, live votes, momentum, milestones, rank, countdown, top 5 showcase and your personal voting link with QR code.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/dashboard.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="My Dashboard — ProFluencer Awards 2026">
+<meta property="og:description" content="Your ProFluencer Awards dashboard: nomination status, live votes, momentum, milestones, rank, countdown, top 5 showcase and your personal voting link with QR code.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/dashboard.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="My Dashboard — ProFluencer Awards 2026">
+<meta name="twitter:description" content="Your ProFluencer Awards dashboard: nomination status, live votes, momentum, milestones, rank, countdown, top 5 showcase and your personal voting link with QR code.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -181,7 +194,7 @@
     var st = STATUS_LABEL[me.status] || STATUS_LABEL.submitted;
 
     var av = document.getElementById('d-avatar');
-    if (me.photo) { av.innerHTML = '<img src="' + me.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; }
+    if (me.photo) { av.innerHTML = '<img src="' + me.photo + '" alt="Profile photo of ' + me.name.replace(/"/g, '&quot;') + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; }
     else av.textContent = PFA.initials(me.name);
 
     document.getElementById('d-name').textContent = me.name;

@@ -7,6 +7,19 @@
 <title>Sponsors — ProFluencer Awards 2026</title>
 <meta name="description" content="Partner with the ProFluencer Awards 2026: reach 50 winning creators and millions of verified voters across 10 industries.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/sponsors.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="Sponsors — ProFluencer Awards 2026">
+<meta property="og:description" content="Partner with the ProFluencer Awards 2026: reach 50 winning creators and millions of verified voters across 10 industries.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/sponsors.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sponsors — ProFluencer Awards 2026">
+<meta name="twitter:description" content="Partner with the ProFluencer Awards 2026: reach 50 winning creators and millions of verified voters across 10 industries.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 </head>
 <body data-page="sponsors">
@@ -55,10 +68,16 @@
 <script>
 (function () {
   var form = document.getElementById('sp-form'), err = document.getElementById('sp-err');
+  var spam = APP.spamGuard(form);
   form.addEventListener('submit', function (e) {
     e.preventDefault(); err.style.display = 'none';
+    var sp = spam.check();
+    if (sp) {
+      if (sp === 'HONEYPOT') { document.getElementById('sp-ok').style.display = 'block'; form.style.display = 'none'; return; }
+      err.textContent = sp; err.style.display = 'block'; return;
+    }
     var fd = new FormData(form), d = {};
-    fd.forEach(function (v, k) { d[k] = String(v).trim(); });
+    fd.forEach(function (v, k) { if (k !== 'website') d[k] = String(v).trim(); });
     if (!d.name || !d.company) { err.textContent = 'Please enter your name and company.'; err.style.display = 'block'; return; }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; err.style.display = 'block'; return; }
     PFA.addEnquiry({ name: d.name + ' (' + d.company + ')', email: d.email, subject: 'Sponsorship — ' + (d.tier || ''), message: d.message || 'Requested the partnership deck.' });

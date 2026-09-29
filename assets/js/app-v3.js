@@ -148,5 +148,37 @@
     mount(); tick(); setInterval(tick, 1000); reveal();
   });
 
-  window.APP = { toast: toast, copyText: copyText, revealScope: revealScope, votingNote: votingNote };
+  /* Lightweight anti-spam: honeypot + time-trap + client-side rate limit.
+     Call once per form at load: var spam = APP.spamGuard(form);
+     Then call spam.check() at the top of the submit handler; it returns an
+     error string or null. Bots that fill the hidden field are silently
+     treated as success so they get no signal. */
+  function spamGuard(form) {
+    var born = Date.now(), key = 'pfa_spam_' + (form.id || 'form');
+    var hp = document.createElement('input');
+    hp.type = 'text'; hp.name = 'website'; hp.autocomplete = 'off'; hp.tabIndex = -1;
+    hp.setAttribute('aria-hidden', 'true');
+    hp.style.cssText = 'position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;opacity:0;pointer-events:none';
+    form.appendChild(hp);
+    function countRecent() {
+      try {
+        var log = JSON.parse(localStorage.getItem(key) || '[]'), now = Date.now();
+        log = log.filter(function (t) { return now - t < 10 * 60 * 1000; });
+        return { log: log, n: log.length };
+      } catch (e) { return { log: [], n: 0 }; }
+    }
+    return {
+      check: function () {
+        if (hp.value) return 'HONEYPOT'; // bot: caller shows a fake success
+        if (Date.now() - born < 2000) return 'HONEYPOT'; // instant submit = bot
+        var r = countRecent();
+        if (r.n >= 5) return 'Please wait a few minutes before submitting again.';
+        r.log.push(Date.now());
+        try { localStorage.setItem(key, JSON.stringify(r.log)); } catch (e) {}
+        return null;
+      }
+    };
+  }
+
+  window.APP = { toast: toast, copyText: copyText, revealScope: revealScope, votingNote: votingNote, spamGuard: spamGuard };
 })();

@@ -7,6 +7,19 @@
 <title>Vote — ProFluencer Awards 2026</title>
 <meta name="description" content="Vote for your favorite nominee at the ProFluencer Awards 2026. Verify your mobile once, then vote for one nominee per category.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/vote.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="Vote — ProFluencer Awards 2026">
+<meta property="og:description" content="Vote for your favorite nominee at the ProFluencer Awards 2026. Verify your mobile once, then vote for one nominee per category.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/vote.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vote — ProFluencer Awards 2026">
+<meta name="twitter:description" content="Vote for your favorite nominee at the ProFluencer Awards 2026. Verify your mobile once, then vote for one nominee per category.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 <style>
 .otp-box{background:rgba(212,175,55,.07);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:18px;text-align:left}
@@ -96,11 +109,19 @@
       '<div class="field"><label>Full name *</label><input id="rv-name" autocomplete="name" placeholder="Your name"' + (me && me.name ? ' value="' + me.name.replace(/"/g, '&quot;') + '"' : '') + '></div>' +
       '<div class="form-2col"><div class="field" style="margin:0"><label>Email *</label><input id="rv-email" type="email" autocomplete="email" placeholder="you@email.com"></div>' +
       '<div class="field" style="margin:0"><label>Phone *</label><input id="rv-phone" type="tel" autocomplete="tel" placeholder="+971 5X XXX XXXX"></div></div>' +
+      '<input type="text" id="rv-website" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;opacity:0;pointer-events:none">' +
       '<p class="hint" id="rv-err" style="color:#fca5a5;display:none;margin-top:10px"></p>' +
       '<button class="btn btn-gold btn-block big-vote" id="rv-submit" style="margin-top:14px">Submit my vote</button></div>';
     document.getElementById('rv-submit').addEventListener('click', function () {
       var err = document.getElementById('rv-err');
       err.style.display = 'none';
+      if (document.getElementById('rv-website').value) { APP.toast('Vote counted for ' + inf.name); render(); return; } // honeypot: bot
+      var key = 'pfa_vote_spam', now = Date.now();
+      try {
+        var log = JSON.parse(localStorage.getItem(key) || '[]').filter(function (t) { return now - t < 10 * 60 * 1000; });
+        if (log.length >= 10) { err.textContent = 'Please wait a few minutes before voting again.'; err.style.display = 'block'; return; }
+        log.push(now); localStorage.setItem(key, JSON.stringify(log));
+      } catch (e) {}
       var r = PFA.registerAndVote(inf.id, {
         name: document.getElementById('rv-name').value,
         email: document.getElementById('rv-email').value,

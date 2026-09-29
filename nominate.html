@@ -7,6 +7,19 @@
 <title>Nominate Yourself — ProFluencer Awards 2026</title>
 <meta name="description" content="Nominate yourself for the ProFluencer Awards 2026. Pick your industry category, get your personal voting link, and rally your audience. Free to enter.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/nominate.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="Nominate Yourself — ProFluencer Awards 2026">
+<meta property="og:description" content="Nominate yourself for the ProFluencer Awards 2026. Pick your industry category, get your personal voting link, and rally your audience. Free to enter.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/nominate.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nominate Yourself — ProFluencer Awards 2026">
+<meta name="twitter:description" content="Nominate yourself for the ProFluencer Awards 2026. Pick your industry category, get your personal voting link, and rally your audience. Free to enter.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 </head>
 <body data-page="nominate">
@@ -90,6 +103,7 @@
   if (PFA.session()) { location.href = 'dashboard.html'; return; }
 
   var form = document.getElementById('nom-form'), err = document.getElementById('ferr'), photoData = '';
+  var spam = APP.spamGuard(form);
   document.getElementById('photo-input').addEventListener('change', function (e) {
     var f = e.target.files[0];
     if (!f) return;
@@ -104,8 +118,13 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     err.style.display = 'none';
+    var sp = spam.check();
+    if (sp) {
+      if (sp === 'HONEYPOT') { location.href = 'dashboard.html?welcome=1'; return; }
+      return fail(sp);
+    }
     var fd = new FormData(form), d = {};
-    fd.forEach(function (v, k) { if (k !== 'photo') d[k] = String(v).trim(); });
+    fd.forEach(function (v, k) { if (k !== 'photo' && k !== 'website') d[k] = String(v).trim(); });
     var req = ['legalName', 'displayName', 'email', 'mobile', 'country', 'city', 'categoryId', 'platform', 'handle', 'profileUrl', 'bio', 'password'];
     for (var i = 0; i < req.length; i++) if (!d[req[i]]) return fail('Please complete all required fields.');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return fail('Please enter a valid email address.');

@@ -7,6 +7,19 @@
 <title>Influencer Portal — ProFluencer Awards 2026</title>
 <meta name="description" content="Influencer portal login for the ProFluencer Awards 2026. Track your votes, rank, countdown and voting link.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/login.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="Influencer Portal — ProFluencer Awards 2026">
+<meta property="og:description" content="Influencer portal login for the ProFluencer Awards 2026. Track your votes, rank, countdown and voting link.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/login.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Influencer Portal — ProFluencer Awards 2026">
+<meta name="twitter:description" content="Influencer portal login for the ProFluencer Awards 2026. Track your votes, rank, countdown and voting link.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 <style>
 .divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.08em}
@@ -54,8 +67,11 @@
 (function () {
   if (PFA.session()) { location.href = 'dashboard.html'; return; }
   var form = document.getElementById('login-form'), err = document.getElementById('ferr');
+  var spam = APP.spamGuard(form);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    var sp = spam.check();
+    if (sp) { APP.toast(sp === 'HONEYPOT' ? 'Welcome back.' : sp); return; }
     var fd = new FormData(form);
     var inf = PFA.login(fd.get('email'), fd.get('password'));
     if (!inf) {

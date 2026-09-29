@@ -7,6 +7,19 @@
 <title>Ceremony & RSVP — ProFluencer Awards 2026</title>
 <meta name="description" content="The ProFluencer Awards afternoon: Friday, December 11, 2026 in Dubai. 50 trophies, live announcements, and an evening gala. RSVP for your invitation.">
 <link rel="icon" type="image/png" href="assets/img/logo-clean.png">
+<link rel="canonical" href="https://dawoodshah2232-svg.github.io/influencer-awards/event.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFluencer Awards 2026">
+<meta property="og:title" content="Ceremony & RSVP — ProFluencer Awards 2026">
+<meta property="og:description" content="The ProFluencer Awards afternoon: Friday, December 11, 2026 in Dubai. 50 trophies, live announcements, and an evening gala. RSVP for your invitation.">
+<meta property="og:url" content="https://dawoodshah2232-svg.github.io/influencer-awards/event.html">
+<meta property="og:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ceremony & RSVP — ProFluencer Awards 2026">
+<meta name="twitter:description" content="The ProFluencer Awards afternoon: Friday, December 11, 2026 in Dubai. 50 trophies, live announcements, and an evening gala. RSVP for your invitation.">
+<meta name="twitter:image" content="https://dawoodshah2232-svg.github.io/influencer-awards/assets/img/og-image.jpg">
 <link rel="stylesheet" href="assets/css/style-v3.css">
 </head>
 <body data-page="event">
@@ -69,11 +82,16 @@
 <script>
 (function () {
   var form = document.getElementById('rsvp-form'), err = document.getElementById('rsvp-err');
+  var spam = APP.spamGuard(form);
   form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    err.style.display = 'none';
+    e.preventDefault(); err.style.display = 'none';
+    var sp = spam.check();
+    if (sp) {
+      if (sp === 'HONEYPOT') { document.getElementById('rsvp-ok').style.display = 'block'; form.style.display = 'none'; return; }
+      err.textContent = sp; err.style.display = 'block'; return;
+    }
     var fd = new FormData(form), d = {};
-    fd.forEach(function (v, k) { d[k] = String(v).trim(); });
+    fd.forEach(function (v, k) { if (k !== 'website') d[k] = String(v).trim(); });
     if (!d.name) { err.textContent = 'Please enter your name.'; err.style.display = 'block'; return; }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) { err.textContent = 'Please enter a valid email.'; err.style.display = 'block'; return; }
     PFA.addRsvp(d);
